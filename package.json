@@ -2,9 +2,13 @@
   "name": "versioncontrolsite",
   "version": "1.0.0",
   "description": "- [x] [Demo 0](#deliverable-0) - [ ] [Demo 1](#deliverable-1) - [ ] [Demo 2](#deliverable-2)",
-  "main": "webpack.config.js",
+  "main": "backend/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:backend": "node backend/server.js",
+    "start:frontend": "webpack serve --mode development --config webpack.config.js",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+  "build": "webpack --mode production --config webpack.config.js"
   },
   "repository": {
     "type": "git",
@@ -13,20 +17,24 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/PLM-18/VersionControlSite/issues"
   },
   "homepage": "https://github.com/PLM-18/VersionControlSite#readme",
   "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.8.2"
   },
   "devDependencies": {
     "@babel/core": "^7.28.3",
     "@babel/preset-env": "^7.28.3",
     "@babel/preset-react": "^7.27.1",
     "babel-loader": "^10.0.0",
+    "concurrently": "^9.2.1",
     "css-loader": "^7.1.2",
     "html-webpack-plugin": "^5.6.4",
     "style-loader": "^4.0.0",
