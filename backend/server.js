@@ -15,7 +15,6 @@ const users = [];
 
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
-// Serve index.html only for non-API GET requests
 app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/public/index.html'));
 });
