@@ -11,13 +11,26 @@ export default {
         filename: 'bundle.js',
     },
     module: {
-        rules: [
-            {
-                test: /\.(js|jsx)$/,
-                exclude: /node_modules/,
-                use: 'babel-loader',
-            },
-        ],
+            rules: [
+                {
+                    test: /\.(js|jsx)$/,
+                    exclude: /node_modules/,
+                    use: 'babel-loader',
+                },
+                {
+                    test: /\.(png|jpe?g|gif|svg)$/i,
+                    use: [
+                        {
+                            loader: 'file-loader',
+                            options: {
+                                name: '[name].[hash].[ext]',
+                                outputPath: 'assets/',
+                                esModule: false,
+                            },
+                        },
+                    ],
+                },
+            ],
     },
     resolve: {
         extensions: ['.js', '.jsx'],

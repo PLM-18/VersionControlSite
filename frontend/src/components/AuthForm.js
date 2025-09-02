@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from './ui/button';
+import { Button } from './ui/button.js';
 import { ArrowLeft } from 'lucide-react';
-import { cn } from '../lib/utils';
-import { Label } from './ui/label';
-import { Input } from './ui/input';
+import { cn } from '../lib/utils.js';
+import { Label } from './ui/label.js';
+import { Input } from './ui/input.js';
 import syncsphereLogo from '../../public/assets/syncsphere-logo.png';
 
 function AuthForm({ type, onSubmit, className }) {

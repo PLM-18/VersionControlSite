@@ -1,28 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
+import AuthForm from "../components/AuthForm.js";
 
-function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const res = await fetch("http://localhost:5000/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
-    });
-    const data = await res.json();
-    alert(data.message);
-  }
+const Login = () => {
+  const handleLogin = (data) => {
+    console.log("Logging in:", data);
+  };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Login</h2>
-      <input value={username} onChange={e => setUsername(e.target.value)} placeholder="Username" />
-      <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" />
-      <button type="submit">Login</button>
-    </form>
+    <AuthForm type="login" onSubmit={handleLogin} />
   );
-}
+};
 
 export default Login;
