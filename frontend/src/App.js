@@ -1,32 +1,23 @@
-import React from "react";
-import Toaster from "./components/ui/Toaster.js"
-import { Toaster as Sonner } from "./components/ui/sonner.js";
-import { TooltipProvider } from "./components/ui/tooltip.js";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Landing from "./pages/Landing.js";
-import NotFound from "./pages/NotFound.js";
-import Login from "./pages/Login.js";
-import Register from "./pages/Register.js";
-import { QueryClient } from "@tanstack/react-query";
-
-const queryClient = new QueryClient();
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LandingPage from './pages/LandingPage.js';
+import SignUpPage from './pages/SignUpPage.js';
+import SignInPage from './pages/SignInPage.js';
+import UsernameSetupPage from './pages/UsernameSetupPage.js';
+import HomePage from './pages/HomePage.js';
 
 function App() {
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Register />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/signin" element={<SignInPage />} />
+        <Route path="/setup-username" element={<UsernameSetupPage />} />
+        <Route path="/home" element={<HomePage />} />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;

@@ -1,36 +1,17 @@
 import React from 'react';
-import { cn } from '../lib/utils.js';
 
-const colorClasses = {
-    red: 'bg-feature-red',
-    pink: 'bg-feature-pink',
-    green: 'bg-feature-green',
-    blue: 'bg-feature-blue'
-};
-
-const FeatureCard = ({
-    title,
-    icon,
-    color,
-    className
-}) => {
-    return (
-        <div
-            className={cn(
-                "flex flex-col items-center justify-center p-8 rounded-2xl text-center transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer",
-                colorClasses[color],
-                "text-white font-medium",
-                className
-            )}
-        >
-            <div className="mb-4 text-3xl">
-                {icon}
-            </div>
-            <h3 className="text-lg font-semibold leading-tight">
-                {title}
-            </h3>
-        </div>
-    );
+const FeatureCard = ({ title, color, icon }) => {
+  return (
+    <div className={`${color} p-6 rounded-2xl hover:scale-105 transition-transform cursor-pointer group relative overflow-hidden`}>
+      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+      <div className="relative z-10">
+        <div className="text-3xl mb-3">{icon}</div>
+        <h3 className="text-white font-semibold text-lg leading-tight">
+          {title}
+        </h3>
+      </div>
+    </div>
+  );
 };
 
 export default FeatureCard;

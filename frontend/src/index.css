@@ -1,116 +1,127 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    /* SyncSphere Dark Theme */
-    --background: 0 0% 3%;
-    --foreground: 210 40% 98%;
-
-    --card: 220 13% 8%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 220 13% 8%;
-    --popover-foreground: 210 40% 98%;
-
-    /* Vibrant green primary from SyncSphere brand */
-    --primary: 145 80% 50%;
-    --primary-foreground: 0 0% 0%;
-
-    --secondary: 220 15% 12%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 220 15% 12%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 220 15% 15%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 220 13% 15%;
-    --input: 220 13% 12%;
-    --ring: 145 80% 50%;
-
-    --radius: 0.75rem;
-
-    /* SyncSphere Feature Card Colors */
-    --feature-red: 0 85% 60%;
-    --feature-pink: 320 85% 60%;
-    --feature-green: 145 80% 50%;
-    --feature-blue: 210 85% 60%;
-
-    /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(320, 85%, 60%), hsl(210, 85%, 60%));
-    --gradient-glow: linear-gradient(180deg, transparent, hsl(145, 80%, 50%, 0.1));
-
-    /* Glass morphism effects */
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
-
-    /* Form specific colors */
-    --form-bg: 220 25% 8%;
-    --form-border: 220 20% 15%;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  /* SyncSphere uses dark theme by default */
+/* Custom scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #374151 #1f2937;
 }
 
-@layer base {
-  * {
-    border-color: hsl(var(--border));
-  }
+*::-webkit-scrollbar {
+  width: 6px;
+}
 
-  body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-family: 'Spline Sans', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    background-image: var(--gradient-glow);
-    background-attachment: fixed;
-  }
+*::-webkit-scrollbar-track {
+  background: #1f2937;
+}
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Spline Sans', sans-serif;
+*::-webkit-scrollbar-thumb {
+  background-color: #374151;
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #4b5563;
+}
+
+/* Custom animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@layer components {
-  .hero-gradient {
-    background: var(--gradient-hero);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
   }
+  50% {
+    opacity: 0.8;
+  }
+}
 
-  .glass-card {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-  }
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
 
-  .form-container {
-    background: hsl(var(--form-bg));
-    border: 1px solid hsl(var(--form-border));
-  }
+.animate-pulse-slow {
+  animation: pulse 3s infinite;
+}
+
+/* Backdrop blur fallback */
+.backdrop-blur-lg {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Focus states */
+input:focus {
+  outline: none;
+}
+
+/* Button hover effects */
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Form styling */
+input[type="text"], 
+input[type="email"], 
+input[type="password"] {
+  transition: all 0.2s ease-in-out;
+}
+
+input[type="text"]:focus, 
+input[type="email"]:focus, 
+input[type="password"]:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+}
+
+/* Loading states */
+.loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  margin-left: -10px;
+  border: 2px solid #374151;
+  border-top: 2px solid #22c55e;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Custom gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #22c55e, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
