@@ -1,3 +1,4 @@
+
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -11,26 +12,34 @@ export default {
         filename: 'bundle.js',
     },
     module: {
-            rules: [
-                {
-                    test: /\.(js|jsx)$/,
-                    exclude: /node_modules/,
-                    use: 'babel-loader',
-                },
-                {
-                    test: /\.(png|jpe?g|gif|svg)$/i,
-                    use: [
-                        {
-                            loader: 'file-loader',
-                            options: {
-                                name: '[name].[hash].[ext]',
-                                outputPath: 'assets/',
-                                esModule: false,
-                            },
+        rules: [
+            {
+                test: /\.(js|jsx)$/,
+                exclude: /node_modules/,
+                use: 'babel-loader',
+            },
+            {
+                test: /\.(png|jpe?g|gif|svg)$/i,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: '[name].[hash].[ext]',
+                            outputPath: 'assets/',
+                            esModule: false,
                         },
-                    ],
-                },
-            ],
+                    },
+                ],
+            },
+            {
+                test: /\.css$/i,
+                use: [
+                    'style-loader',
+                    'css-loader',
+                    'postcss-loader',
+                ],
+            },
+        ],
     },
     resolve: {
         extensions: ['.js', '.jsx'],
