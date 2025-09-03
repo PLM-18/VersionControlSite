@@ -1,4 +1,8 @@
 /* Custom scrollbar */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 * {
   scrollbar-width: thin;
   scrollbar-color: #374151 #1f2937;
