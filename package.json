@@ -23,15 +23,13 @@
   },
   "homepage": "https://github.com/PLM-18/VersionControlSite#readme",
   "dependencies": {
-    "@tailwindcss/cli": "^4.1.12",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "lucide-react": "^0.542.0",
     "next-themes": "^0.4.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router-dom": "^7.8.2",
-    "tailwindcss": "^4.1.12"
+    "react-router-dom": "^7.8.2"
   },
   "devDependencies": {
     "@babel/core": "^7.28.3",
