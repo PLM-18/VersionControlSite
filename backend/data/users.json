@@ -14,6 +14,23 @@
     "isAdmin": false,
     "isVerified": false,
     "createdAt": "2025-09-04T12:23:20.710Z",
-    "lastActive": "2025-09-04T12:23:37.737Z"
+    "lastActive": "2025-09-04T13:25:21.871Z"
+  },
+  {
+    "id": "1756991982026m6e5qcwfw",
+    "username": "plm",
+    "email": "philemonmuleya@gmail.com",
+    "password": "$2b$10$BIxcRcRkjIkd8JjjyNMctu1fH3IHQfh.w7m2liWh023jQuj6n3o.m",
+    "firstName": "",
+    "lastName": "",
+    "profileImage": null,
+    "bio": "",
+    "location": "",
+    "website": "",
+    "birthday": "",
+    "isAdmin": false,
+    "isVerified": false,
+    "createdAt": "2025-09-04T13:19:42.026Z",
+    "lastActive": "2025-09-04T13:24:42.216Z"
   }
 ]

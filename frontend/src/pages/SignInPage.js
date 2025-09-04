@@ -33,6 +33,7 @@ const SignInPage = () => {
       });
 
       if (response.ok) {
+        localStorage.setItem('token', (await response.json()).token);
         navigate('/home');
       } else {
         const data = await response.json();
