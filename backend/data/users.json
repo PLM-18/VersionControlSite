@@ -1,0 +1,19 @@
+[
+  {
+    "id": "1756988600710jao2tdeae",
+    "username": "john_doe",
+    "email": "john@example.com",
+    "password": "$2b$10$rKVs.fHfKol0YdgEzYzvOOrgjToByQjYhPEBl7VbGE/COs4KwHYgK",
+    "firstName": "John",
+    "lastName": "Werner",
+    "profileImage": "/uploads/1756988805563-syncsphere-logo.png",
+    "bio": "Software Developer",
+    "location": "",
+    "website": "",
+    "birthday": "",
+    "isAdmin": false,
+    "isVerified": false,
+    "createdAt": "2025-09-04T12:23:20.710Z",
+    "lastActive": "2025-09-04T12:23:37.737Z"
+  }
+]
