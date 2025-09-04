@@ -39,6 +39,7 @@ const SignUpPage = () => {
         },
         body: JSON.stringify({
           username: formData.username,
+          email: formData.email,
           password: formData.password
         }),
       });

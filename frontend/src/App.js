@@ -5,6 +5,7 @@ import SignUpPage from './pages/SignUpPage.js';
 import SignInPage from './pages/SignInPage.js';
 import UsernameSetupPage from './pages/UsernameSetupPage.js';
 import HomePage from './pages/HomePage.js';
+import ProjectsPage from './pages/ProjectsPage.js';
 
 function App() {
   return (
@@ -15,6 +16,8 @@ function App() {
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/setup-username" element={<UsernameSetupPage />} />
         <Route path="/home" element={<HomePage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/create-project" element={<ProjectsPage />} />
       </Routes>
     </Router>
   );

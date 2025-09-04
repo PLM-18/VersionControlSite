@@ -25,6 +25,7 @@ const UsernameSetupPage = () => {
         },
         body: JSON.stringify({
           username,
+          email,
           password
         }),
       });
