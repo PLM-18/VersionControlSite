@@ -6,7 +6,6 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState('Projects');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // Mock user data
   const [userProfile, setUserProfile] = useState({
     name: 'John Doe',
     username: '@johndoe',
@@ -111,7 +110,6 @@ const ProfilePage = () => {
     <div className="min-h-screen bg-gray-900 text-white flex">
       <Sidebar user={userProfile} currentPage="profile" />
       <div className="flex-1">
-        {/* Header */}
         <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="relative">
@@ -125,10 +123,8 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Profile Header with Gradient Background */}
         <div className="relative">
           <div className="h-48 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600"></div>
-          
           <div className="absolute -bottom-16 left-8">
             <div className="relative">
               <div className="w-32 h-32 bg-gray-700 rounded-full border-4 border-gray-800 flex items-center justify-center">
@@ -147,7 +143,6 @@ const ProfilePage = () => {
           </button>
         </div>
 
-        {/* Profile Info */}
         <div className="mt-20 px-8 pb-6 bg-gray-900">
           <div className="flex flex-col">
             <h1 className="text-3xl font-bold text-white">{userProfile.name}</h1>
@@ -177,7 +172,6 @@ const ProfilePage = () => {
               </div>
             </div>
 
-            {/* Favorite Languages */}
             <div className="mb-6">
               <h3 className="text-sm font-semibold text-gray-300 mb-2">Favorite Languages</h3>
               <div className="flex flex-wrap gap-2">
@@ -194,7 +188,6 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="px-8 border-b border-gray-700 bg-gray-900">
           <div className="flex space-x-8">
             {['Activities', 'Projects'].map((tab) => (
@@ -213,7 +206,6 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Content */}
         <div className="px-8 py-6 bg-gray-900">
           {activeTab === 'Projects' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

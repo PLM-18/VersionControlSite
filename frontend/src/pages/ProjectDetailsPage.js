@@ -355,18 +355,15 @@ export default ProductCard;`
   const handleFileClick = (file) => {
     if (file.type === 'folder') {
       if (file.isParent) {
-        // Go back to parent directory
         const pathParts = currentPath.split('/').filter(p => p);
         pathParts.pop();
         setCurrentPath(pathParts.length > 0 ? pathParts.join('/') + '/' : '');
       } else {
-        // Navigate to folder
         setCurrentPath(currentPath + file.name);
       }
       setSelectedFile(null);
       setFileContent('');
     } else {
-      // View file
       const filePath = currentPath + file.name;
       setSelectedFile(file);
       setFileContent(mockFileContents[filePath] || `// Content of ${file.name}\n// This is a preview of the file content.\n\n// File: ${filePath}\n// Size: ${file.size}\n// Last Modified: ${file.lastModified}`);
@@ -408,7 +405,6 @@ export default ProductCard;`
 
 return (
     <div className="min-h-screen bg-gray-900 text-white">
-        {/* Header */}
         <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -441,7 +437,6 @@ return (
             </div>
         </header>
 
-        {/* Project Stats */}
         <div className="bg-gray-800 px-6 py-4 border-b border-gray-700">
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-8">
@@ -478,7 +473,6 @@ return (
             </div>
         </div>
 
-        {/* Tabs */}
         <div className="bg-gray-800 px-6 border-b border-gray-700">
             <div className="flex space-x-8">
                 {['files', 'activity', 'contributors'].map((tab) => (
@@ -497,12 +491,9 @@ return (
             </div>
         </div>
 
-        {/* Tab Content */}
         {activeTab === 'files' ? (
             <div className="flex h-screen">
-                {/* File Explorer */}
                 <div className="w-1/2 border-r border-gray-700 flex flex-col">
-                    {/* Breadcrumb */}
                     <div className="bg-gray-800 px-4 py-3 border-b border-gray-700">
                         <div className="flex items-center space-x-2 text-sm">
                             {getBreadcrumbs().map((crumb, index) => (
@@ -526,7 +517,6 @@ return (
                         </div>
                     </div>
 
-                    {/* Search */}
                     <div className="p-4 border-b border-gray-700">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
@@ -540,7 +530,6 @@ return (
                         </div>
                     </div>
 
-                    {/* File List */}
                     <div className="flex-1 overflow-y-auto">
                         {filteredFiles.length === 0 ? (
                             <div className="p-4 text-center text-gray-400">
@@ -570,11 +559,9 @@ return (
                     </div>
                 </div>
 
-                {/* File Viewer */}
                 <div className="flex-1 flex flex-col">
                     {selectedFile ? (
                         <>
-                            {/* File Header */}
                             <div className="bg-gray-800 px-4 py-3 border-b border-gray-700">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-3">
@@ -604,7 +591,6 @@ return (
                                 </div>
                             </div>
 
-                            {/* File Content */}
                             <div className="flex-1 overflow-auto">
                                 <pre className="p-4 text-sm font-mono text-gray-300 whitespace-pre-wrap">
                                     {fileContent}

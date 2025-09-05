@@ -17,7 +17,6 @@ const ProjectCard = ({ project, viewMode, onUpdate }) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleProjectClick = (e) => {
-    // Prevent navigation when clicking on menu buttons
     if (e.target.closest('button')) {
       return;
     }
@@ -29,7 +28,6 @@ const ProjectCard = ({ project, viewMode, onUpdate }) => {
       return;
 
     setIsDeleting(true);
-    // Mock delete - just call the update function
     setTimeout(() => {
       onUpdate();
       setIsDeleting(false);
@@ -37,12 +35,10 @@ const ProjectCard = ({ project, viewMode, onUpdate }) => {
   };
 
   const handleCheckOut = () => {
-    // Mock checkout - just call the update function
     onUpdate();
   };
 
   const handleDownload = () => {
-    // Mock download
     alert(`Downloading ${project.name}.zip`);
   };
 
@@ -55,7 +51,6 @@ const ProjectCard = ({ project, viewMode, onUpdate }) => {
     if (diffHours < 24) {
       return `${diffHours} hours ago`;
     } else if (diffHours < 168) {
-      // 7 days
       return `${Math.floor(diffHours / 24)} days ago`;
     } else {
       return `${Math.floor(diffHours / 168)} weeks ago`;
@@ -138,7 +133,6 @@ const ProjectCard = ({ project, viewMode, onUpdate }) => {
       className="bg-gray-800 rounded-lg overflow-hidden card-hover cursor-pointer" 
       onClick={handleProjectClick}
     >
-      {/* Project Header */}
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
@@ -174,7 +168,6 @@ const ProjectCard = ({ project, viewMode, onUpdate }) => {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
-                    // Navigate to edit
                   }}
                   className="w-full text-left px-4 py-2 hover:bg-gray-600 flex items-center space-x-2"
                 >

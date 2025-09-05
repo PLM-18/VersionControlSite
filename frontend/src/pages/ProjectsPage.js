@@ -115,12 +115,9 @@ const ProjectsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex">
-      {/* Sidebar */}
       <Sidebar user={user} currentPage="create-project" />
       
-      {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Top Bar */}
         <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -138,7 +135,6 @@ const ProjectsPage = () => {
           </div>
         </header>
 
-        {/* Search and Filters */}
         <div className="bg-gray-800 px-6 py-4 border-b border-gray-700">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -220,7 +216,6 @@ const ProjectsPage = () => {
           </div>
         </div>
 
-        {/* Projects Grid/List */}
         <main className="flex-1 p-6">
           {filteredProjects.length === 0 ? (
             <div className="text-center py-12">
@@ -282,7 +277,6 @@ const ProjectsPage = () => {
         </main>
       </div>
       
-      {/* Create Project Modal */}
       {showCreateModal && (
         <CreateProjectModal
           onClose={() => setShowCreateModal(false)}

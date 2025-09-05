@@ -48,7 +48,6 @@ const SignInPage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* Background pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
           backgroundImage: `radial-gradient(circle at 25% 25%, #4f46e5 0%, transparent 50%), 
@@ -63,7 +62,6 @@ const SignInPage = () => {
         <div className="flex items-center justify-center min-h-screen px-4">
           <div className="w-full max-w-md">
             <div className="bg-gray-900 bg-opacity-80 backdrop-blur-lg rounded-2xl p-8 border border-gray-700">
-              {/* Logo */}
               <div className="flex justify-center mb-6">
                 <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-blue-500 rounded-2xl flex items-center justify-center">
                   <span className="text-black font-bold text-2xl">S</span>

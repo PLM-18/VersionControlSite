@@ -23,9 +23,8 @@ const NotificationsPage = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
-  const [filter, setFilter] = useState('all'); // all, unread, read
+  const [filter, setFilter] = useState('all'); 
 
-  // Mock notifications data
   const mockNotifications = [
     {
       id: 1,
@@ -126,7 +125,6 @@ const NotificationsPage = () => {
   ];
 
   useEffect(() => {
-    // Mock user data
     const mockUser = {
       id: 1,
       firstName: 'John',
@@ -182,9 +180,7 @@ const NotificationsPage = () => {
       {/* Sidebar */}
       <Sidebar user={user} currentPage="notifications" />
       
-      {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Top Bar */}
         <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
           <div className="flex items-center justify-between">
             <SearchBar />
@@ -210,10 +206,8 @@ const NotificationsPage = () => {
           </div>
         </header>
 
-        {/* Notifications Section */}
         <main className="flex-1 px-6 py-8">
           <div className="max-w-4xl mx-auto">
-            {/* Header */}
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h1 className="text-3xl font-bold gradient-text mb-2">Notifications</h1>
@@ -248,7 +242,6 @@ const NotificationsPage = () => {
               </div>
             </div>
 
-            {/* Filter Tabs */}
             <div className="flex items-center space-x-1 mb-6 bg-gray-800 rounded-lg p-1 w-fit">
               <button
                 onClick={() => setFilter('all')}
@@ -282,7 +275,6 @@ const NotificationsPage = () => {
               </button>
             </div>
 
-            {/* Notifications List */}
             {filteredNotifications.length > 0 ? (
               <div className="space-y-3">
                 {filteredNotifications.map((notification) => {

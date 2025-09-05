@@ -12,7 +12,6 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock user data instead of API call
     const mockUser = {
       id: 1,
       firstName: 'John',

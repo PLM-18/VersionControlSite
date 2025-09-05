@@ -9,7 +9,6 @@ const UsernameSetupPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get email and password from previous step
   const { email, password } = location.state || {};
 
   const handleSubmit = async (e) => {
