@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar.js';
-import SearchBar from '../components/SearchBar.js';
-import ProjectCard from '../components/ProjectCard.js';
 import CreateProjectModal from '../components/CreateProjectModal.js';
 import { Plus, Filter, Search, Grid, List } from 'lucide-react';
 
@@ -118,7 +116,7 @@ const ProjectsPage = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white flex">
       {/* Sidebar */}
-      <Sidebar user={user} currentPage="projects" />
+      <Sidebar user={user} currentPage="create-project" />
       
       {/* Main Content */}
       <div className="flex-1 flex flex-col">

@@ -8,6 +8,7 @@ import HomePage from './pages/HomePage.js';
 import ProjectsPage from './pages/ProjectsPage.js';
 import ProfilePage from './pages/ProfilePage.js';
 import ProjectDetailPage from './pages/ProjectDetailsPage.js';
+import NotificationsPage from './pages/NotificationsPage.js';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/create-project" element={<ProjectsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/project/:id" element={<ProjectDetailPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
       </Routes>
     </Router>
   );

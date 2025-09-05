@@ -406,241 +406,250 @@ export default ProductCard;`
     );
   }
 
-  return (
+return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => navigate('/projects')}
-              className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              <ArrowLeft size={20} onClick={() => navigate('/projects')} />
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold">{project?.name}</h1>
-              <p className="text-gray-400">{project?.description}</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="px-3 py-1 bg-blue-600 text-blue-100 text-sm rounded">
-              {project?.type}
-            </span>
-            <span className="px-3 py-1 bg-gray-700 text-gray-300 text-sm rounded">
-              v{project?.version}
-            </span>
-            <span className={`px-3 py-1 text-sm rounded ${
-              project?.status === 'checked_out' 
-                ? 'bg-orange-600 text-orange-100' 
-                : 'bg-green-600 text-green-100'
-            }`}>
-              {project?.status === 'checked_out' ? 'Checked Out' : 'Available'}
-            </span>
-          </div>
-        </div>
-      </header>
-
-      {/* Project Stats */}
-      <div className="bg-gray-800 px-6 py-4 border-b border-gray-700">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-8">
-            <div className="flex items-center space-x-2">
-              <GitBranch className="text-green-400" size={16} />
-              <span className="text-sm text-gray-300">{project?.stats.commits} commits</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Code className="text-blue-400" size={16} />
-              <span className="text-sm text-gray-300">{project?.stats.filesCount} files</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Users className="text-purple-400" size={16} />
-              <span className="text-sm text-gray-300">{project?.stats.contributors} contributors</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Clock className="text-yellow-400" size={16} />
-              <span className="text-sm text-gray-300">Updated {formatDate(project?.updatedAt)}</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            {project?.members.map((member, index) => (
-              <img
-                key={member.id}
-                src={member.avatar}
-                alt={member.name}
-                className="w-8 h-8 rounded-full border-2 border-gray-600"
-                title={member.name}
-                style={{ marginLeft: index > 0 ? '-8px' : '0' }}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="bg-gray-800 px-6 border-b border-gray-700">
-        <div className="flex space-x-8">
-          {['files', 'activity', 'contributors'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`py-4 px-2 border-b-2 transition-colors capitalize ${
-                activeTab === tab
-                  ? 'border-green-500 text-green-400'
-                  : 'border-transparent text-gray-400 hover:text-white'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Tab Content */}
-      {activeTab === 'files' ? (
-        <div className="flex h-screen">
-          {/* File Explorer */}
-          <div className="w-1/2 border-r border-gray-700 flex flex-col">
-            {/* Breadcrumb */}
-            <div className="bg-gray-800 px-4 py-3 border-b border-gray-700">
-              <div className="flex items-center space-x-2 text-sm">
-                {getBreadcrumbs().map((crumb, index) => (
-                  <React.Fragment key={index}>
-                    {index > 0 && <ChevronRight size={14} className="text-gray-500" />}
+        {/* Header */}
+        <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
                     <button
-                      onClick={() => {
-                        if (index === 0) {
-                          setCurrentPath('');
-                        } else {
-                          const pathParts = getBreadcrumbs().slice(1, index + 1);
-                          setCurrentPath(pathParts.join('/') + '/');
-                        }
-                      }}
-                      className="text-gray-300 hover:text-white transition-colors"
+                        onClick={() => navigate('/projects')}
+                        className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
                     >
-                      {crumb}
+                        <ArrowLeft size={20} onClick={() => navigate('/projects')} />
                     </button>
-                  </React.Fragment>
-                ))}
-              </div>
-            </div>
-
-            {/* Search */}
-            <div className="p-4 border-b border-gray-700">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                <input
-                  type="text"
-                  placeholder="Search files..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-400 focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                />
-              </div>
-            </div>
-
-            {/* File List */}
-            <div className="flex-1 overflow-y-auto">
-              {filteredFiles.length === 0 ? (
-                <div className="p-4 text-center text-gray-400">
-                  <File size={48} className="mx-auto mb-2 opacity-30" />
-                  <p>No files found</p>
-                </div>
-              ) : (
-                filteredFiles.map((file, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handleFileClick(file)}
-                    className={`flex items-center space-x-3 px-4 py-3 hover:bg-gray-800 cursor-pointer transition-colors border-b border-gray-800 ${
-                      selectedFile?.name === file.name ? 'bg-gray-800' : ''
-                    }`}
-                  >
-                    {getFileIcon(file.name, file.type)}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white truncate">{file.name}</p>
-                      <div className="flex items-center space-x-4 text-xs text-gray-400">
-                        <span>{file.lastModified}</span>
-                        <span>{file.size}</span>
-                      </div>
+                    <div>
+                        <h1 className="text-2xl font-bold">{project?.name}</h1>
+                        <p className="text-gray-400">{project?.description}</p>
                     </div>
-                  </div>
-                ))
-              )}
+                </div>
+                <div className="flex items-center space-x-2">
+                    <span className="px-3 py-1 bg-blue-600 text-blue-100 text-sm rounded">
+                        {project?.type}
+                    </span>
+                    <span className="px-3 py-1 bg-gray-700 text-gray-300 text-sm rounded">
+                        v{project?.version}
+                    </span>
+                    <span className={`px-3 py-1 text-sm rounded ${
+                        project?.status === 'checked_out' 
+                            ? 'bg-orange-600 text-orange-100' 
+                            : 'bg-green-600 text-green-100'
+                    }`}>
+                        {project?.status === 'checked_out' ? 'Checked Out' : 'Available'}
+                    </span>
+                </div>
             </div>
-          </div>
+        </header>
 
-          {/* File Viewer */}
-          <div className="flex-1 flex flex-col">
-            {selectedFile ? (
-              <>
-                {/* File Header */}
-                <div className="bg-gray-800 px-4 py-3 border-b border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      {getFileIcon(selectedFile.name, selectedFile.type)}
-                      <div>
-                        <h3 className="font-semibold">{selectedFile.name}</h3>
-                        <div className="flex items-center space-x-4 text-xs text-gray-400">
-                          <div className="flex items-center space-x-1">
-                            <Calendar size={12} />
-                            <span>{selectedFile.lastModified}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <File size={12} />
-                            <span>{selectedFile.size}</span>
-                          </div>
-                        </div>
-                      </div>
+        {/* Project Stats */}
+        <div className="bg-gray-800 px-6 py-4 border-b border-gray-700">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-8">
+                    <div className="flex items-center space-x-2">
+                        <GitBranch className="text-green-400" size={16} />
+                        <span className="text-sm text-gray-300">{project?.stats.commits} commits</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <button className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors">
-                        <Download size={16} />
-                      </button>
-                      <button className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors">
-                        <Edit size={16} />
-                      </button>
+                        <Code className="text-blue-400" size={16} />
+                        <span className="text-sm text-gray-300">{project?.stats.filesCount} files</span>
                     </div>
-                  </div>
+                    <div className="flex items-center space-x-2">
+                        <Users className="text-purple-400" size={16} />
+                        <span className="text-sm text-gray-300">{project?.stats.contributors} contributors</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Clock className="text-yellow-400" size={16} />
+                        <span className="text-sm text-gray-300">Updated {formatDate(project?.updatedAt)}</span>
+                    </div>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                    {project?.members.map((member, index) => (
+                        <img
+                            key={member.id}
+                            src={member.avatar}
+                            alt={member.name}
+                            className="w-8 h-8 rounded-full border-2 border-gray-600"
+                            title={member.name}
+                            style={{ marginLeft: index > 0 ? '-8px' : '0' }}
+                        />
+                    ))}
+                </div>
+            </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="bg-gray-800 px-6 border-b border-gray-700">
+            <div className="flex space-x-8">
+                {['files', 'activity', 'contributors'].map((tab) => (
+                    <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`py-4 px-2 border-b-2 transition-colors capitalize ${
+                            activeTab === tab
+                                ? 'border-green-500 text-green-400'
+                                : 'border-transparent text-gray-400 hover:text-white'
+                        }`}
+                    >
+                        {tab}
+                    </button>
+                ))}
+            </div>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'files' ? (
+            <div className="flex h-screen">
+                {/* File Explorer */}
+                <div className="w-1/2 border-r border-gray-700 flex flex-col">
+                    {/* Breadcrumb */}
+                    <div className="bg-gray-800 px-4 py-3 border-b border-gray-700">
+                        <div className="flex items-center space-x-2 text-sm">
+                            {getBreadcrumbs().map((crumb, index) => (
+                                <React.Fragment key={index}>
+                                    {index > 0 && <ChevronRight size={14} className="text-gray-500" />}
+                                    <button
+                                        onClick={() => {
+                                            if (index === 0) {
+                                                setCurrentPath('');
+                                            } else {
+                                                const pathParts = getBreadcrumbs().slice(1, index + 1);
+                                                setCurrentPath(pathParts.join('/') + '/');
+                                            }
+                                        }}
+                                        className="text-gray-300 hover:text-white transition-colors"
+                                    >
+                                        {crumb}
+                                    </button>
+                                </React.Fragment>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Search */}
+                    <div className="p-4 border-b border-gray-700">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                            <input
+                                type="text"
+                                placeholder="Search files..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full bg-gray-700 border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-400 focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                            />
+                        </div>
+                    </div>
+
+                    {/* File List */}
+                    <div className="flex-1 overflow-y-auto">
+                        {filteredFiles.length === 0 ? (
+                            <div className="p-4 text-center text-gray-400">
+                                <File size={48} className="mx-auto mb-2 opacity-30" />
+                                <p>No files found</p>
+                            </div>
+                        ) : (
+                            filteredFiles.map((file, index) => (
+                                <div
+                                    key={index}
+                                    onClick={() => handleFileClick(file)}
+                                    className={`flex items-center space-x-3 px-4 py-3 hover:bg-gray-800 cursor-pointer transition-colors border-b border-gray-800 ${
+                                        selectedFile?.name === file.name ? 'bg-gray-800' : ''
+                                    }`}
+                                >
+                                    {getFileIcon(file.name, file.type)}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-white truncate">{file.name}</p>
+                                        <div className="flex items-center space-x-4 text-xs text-gray-400">
+                                            <span>{file.lastModified}</span>
+                                            <span>{file.size}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </div>
 
-                {/* File Content */}
-                <div className="flex-1 overflow-auto">
-                  <pre className="p-4 text-sm font-mono text-gray-300 whitespace-pre-wrap">
-                    {fileContent}
-                  </pre>
+                {/* File Viewer */}
+                <div className="flex-1 flex flex-col">
+                    {selectedFile ? (
+                        <>
+                            {/* File Header */}
+                            <div className="bg-gray-800 px-4 py-3 border-b border-gray-700">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                        {getFileIcon(selectedFile.name, selectedFile.type)}
+                                        <div>
+                                            <h3 className="font-semibold">{selectedFile.name}</h3>
+                                            <div className="flex items-center space-x-4 text-xs text-gray-400">
+                                                <div className="flex items-center space-x-1">
+                                                    <Calendar size={12} />
+                                                    <span>{selectedFile.lastModified}</span>
+                                                </div>
+                                                <div className="flex items-center space-x-1">
+                                                    <File size={12} />
+                                                    <span>{selectedFile.size}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <button className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors">
+                                            <Download size={16} />
+                                        </button>
+                                        <button className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors">
+                                            <Edit size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* File Content */}
+                            <div className="flex-1 overflow-auto">
+                                <pre className="p-4 text-sm font-mono text-gray-300 whitespace-pre-wrap">
+                                    {fileContent}
+                                </pre>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex-1 flex items-center justify-center">
+                            <div className="text-center text-gray-400">
+                                <Eye size={64} className="mx-auto mb-4 opacity-30" />
+                                <h3 className="text-xl font-semibold mb-2">Select a file to view</h3>
+                                <p>Click on any file in the explorer to preview its contents</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
-              </>
-            ) : (
-              <div className="flex-1 flex items-center justify-center">
+            </div>
+        ) : activeTab === 'activity' ? (
+            <div className="p-6">
                 <div className="text-center text-gray-400">
-                  <Eye size={64} className="mx-auto mb-4 opacity-30" />
-                  <h3 className="text-xl font-semibold mb-2">Select a file to view</h3>
-                  <p>Click on any file in the explorer to preview its contents</p>
+                    <Clock size={64} className="mx-auto mb-4 opacity-30" />
+                    <h3 className="text-xl font-semibold mb-2">Project Activity</h3>
+                    <p>Recent commits, merges, and project updates will appear here</p>
                 </div>
-              </div>
-            )}
-          </div>
-        </div>
-      ) : activeTab === 'activity' ? (
-        <div className="p-6">
-          <div className="text-center text-gray-400">
-            <Clock size={64} className="mx-auto mb-4 opacity-30" />
-            <h3 className="text-xl font-semibold mb-2">Project Activity</h3>
-            <p>Recent commits, merges, and project updates will appear here</p>
-          </div>
-        </div>
-      ) : (
-        <div className="p-6">
-          <div className="text-center text-gray-400">
-            <Users size={64} className="mx-auto mb-4 opacity-30" />
-            <h3 className="text-xl font-semibold mb-2">Contributors</h3>
-            <p>Project team members and their contributions will be shown here</p>
-          </div>
-        </div>
-      )}
+            </div>
+        ) : (
+            <div className="p-6 flex flex-wrap gap-6 justify-center">
+                {project?.members.map((member) => (
+                    <div
+                        key={member.id}
+                        className="bg-gray-800 rounded-lg shadow-md p-6 flex flex-col items-center w-64"
+                    >
+                        <img
+                            src={member.avatar}
+                            alt={member.name}
+                            className="w-20 h-20 rounded-full border-4 border-green-500 mb-4"
+                        />
+                        <h3 className="text-lg font-semibold text-white mb-2">{member.name}</h3>
+                        <span className="text-sm text-gray-400">Contributor</span>
+                    </div>
+                ))}
+            </div>
+        )}
     </div>
-  );
+);
 };
 
 export default ProjectDetailPage;
