@@ -12,41 +12,19 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is authenticated
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/signin');
-      return;
-    }
+    // Mock user data instead of API call
+    const mockUser = {
+      id: 1,
+      firstName: 'John',
+      lastName: 'Doe',
+      username: 'johndoe',
+      email: 'johndoe@gmail.com',
+      profileImage: null
+    };
 
-    // Fetch user profile
-    fetchUserProfile();
-  }, [navigate]);
-
-  const fetchUserProfile = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/users/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-      } else {
-        throw new Error('Failed to fetch user profile');
-      }
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-      // If token is invalid, redirect to signin
-      localStorage.removeItem('token');
-      navigate('/signin');
-    } finally {
-      setLoading(false);
-    }
-  };
+    setUser(mockUser);
+    setLoading(false);
+  }, []);
 
   if (loading) {
     return (
@@ -75,11 +53,11 @@ const HomePage = () => {
               </button>
               
               <div className="flex items-center space-x-3">
-                <img 
-                  src={user?.profileImage || '/api/placeholder/32/32'} 
-                  alt={user?.firstName} 
-                  className="w-8 h-8 rounded-full"
-                />
+                <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                  </svg>
+                </div>
                 <span className="text-sm font-medium">{user?.firstName} {user?.lastName}</span>
                 <div className="w-2 h-2 bg-green-400 rounded-full"></div>
               </div>

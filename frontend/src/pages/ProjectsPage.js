@@ -22,92 +22,78 @@ const ProjectsPage = () => {
   });
 
   useEffect(() => {
-    // Check if user is authenticated
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/signin');
-      return;
-    }
+    // Mock user data
+    const mockUser = {
+      id: 1,
+      firstName: 'John',
+      lastName: 'Doe',
+      username: 'johndoe',
+      email: 'johndoe@gmail.com',
+      profileImage: null
+    };
 
-    fetchUserProfile();
-    fetchUserProjects();
-  }, [navigate]);
-
-  const fetchUserProfile = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/users/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
+    // Mock projects data
+    const mockProjects = [
+      {
+        id: 1,
+        name: 'E-commerce Platform',
+        description: 'A modern e-commerce platform built with React and Node.js featuring real-time inventory management and payment.',
+        type: 'TypeScript',
+        hashtags: [],
+        status: 'checked_in',
+        version: '1.0.0',
+        members: [1],
+        ownerId: 1,
+        updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 2,
+        name: 'Mobile Banking App',
+        description: 'Secure mobile banking application with biometric authentication and real-time transaction monitoring.',
+        type: 'React Native',
+        hashtags: [],
+        status: 'checked_in',
+        version: '1.0.0',
+        members: [1],
+        ownerId: 1,
+        updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 3,
+        name: 'AI Analytics Dashboard',
+        description: 'Machine learning powered analytics dashboard for business intelligence and data visualization.',
+        type: 'Python',
+        hashtags: [],
+        status: 'checked_in',
+        version: '1.0.0',
+        members: [1],
+        ownerId: 1,
+        updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
       }
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-    }
-  };
+    ];
 
-  const fetchUserProjects = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/projects', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (response.ok) {
-        const projectsData = await response.json();
-        // Filter to only show user's projects
-        const userProjects = projectsData.filter(
-          project => project.ownerId === user?.id || project.members?.includes(user?.id)
-        );
-        setProjects(userProjects);
-      }
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setUser(mockUser);
+    setProjects(mockProjects);
+    setLoading(false);
+  }, []);
 
   const handleCreateProject = async (projectData) => {
-    try {
-      const token = localStorage.getItem('token');
-      const formData = new FormData();
-      
-      Object.keys(projectData).forEach(key => {
-        if (key === 'hashtags') {
-          formData.append(key, JSON.stringify(projectData[key]));
-        } else if (key === 'files') {
-          projectData[key].forEach(file => {
-            formData.append('files', file);
-          });
-        } else {
-          formData.append(key, projectData[key]);
-        }
-      });
-
-      const response = await fetch('/api/projects', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
-
-      if (response.ok) {
-        const newProject = await response.json();
-        setProjects(prev => [newProject, ...prev]);
-        setShowCreateModal(false);
-      }
-    } catch (error) {
-      console.error('Error creating project:', error);
-    }
+    // Mock create project
+    const newProject = {
+      id: projects.length + 1,
+      name: projectData.name,
+      description: projectData.description,
+      type: projectData.type,
+      hashtags: projectData.hashtags,
+      status: 'checked_in',
+      version: projectData.version,
+      members: [user.id],
+      ownerId: user.id,
+      updatedAt: new Date().toISOString()
+    };
+    
+    setProjects(prev => [newProject, ...prev]);
+    setShowCreateModal(false);
   };
 
   const filteredProjects = projects.filter(project => {
@@ -182,18 +168,18 @@ const ProjectsPage = () => {
                   <div className="absolute top-12 left-0 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-10 p-4 w-64">
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Project Type</label>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Language/Framework</label>
                         <select
                           value={filters.type}
                           onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
                           className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2"
                         >
-                          <option value="">All Types</option>
-                          <option value="Web Application">Web Application</option>
-                          <option value="Mobile App">Mobile App</option>
-                          <option value="Desktop Application">Desktop Application</option>
-                          <option value="Library">Library</option>
-                          <option value="API">API</option>
+                          <option value="">All Languages</option>
+                          <option value="TypeScript">TypeScript</option>
+                          <option value="React Native">React Native</option>
+                          <option value="Python">Python</option>
+                          <option value="JavaScript">JavaScript</option>
+                          <option value="Java">Java</option>
                         </select>
                       </div>
                       
@@ -260,12 +246,38 @@ const ProjectsPage = () => {
               }
             `}>
               {filteredProjects.map(project => (
-                <ProjectCard 
-                  key={project.id} 
-                  project={project} 
-                  viewMode={viewMode}
-                  onUpdate={fetchUserProjects}
-                />
+                <div
+                  key={project.id}
+                  className={viewMode === 'grid' ? 'bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-all cursor-pointer' : ''}
+                  onClick={() => navigate(`/project/${project.id}`)}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-2">{project.name}</h3>
+                      <p className="text-gray-400 text-sm line-clamp-2">{project.description}</p>
+                    </div>
+                    {viewMode === 'grid' && (
+                      <button className="p-2 text-gray-400 hover:text-white">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">{project.type}</span>
+                    <span className="text-gray-500">
+                      {(() => {
+                        const hours = Math.floor((Date.now() - new Date(project.updatedAt)) / (1000 * 60 * 60));
+                        if (hours < 24) return `${hours} hours ago`;
+                        const days = Math.floor(hours / 24);
+                        if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
+                        return `${Math.floor(days / 7)} week${Math.floor(days / 7) > 1 ? 's' : ''} ago`;
+                      })()}
+                    </span>
+                  </div>
+                </div>
               ))}
             </div>
           )}

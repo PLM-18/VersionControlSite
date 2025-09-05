@@ -6,6 +6,7 @@ import SignInPage from './pages/SignInPage.js';
 import UsernameSetupPage from './pages/UsernameSetupPage.js';
 import HomePage from './pages/HomePage.js';
 import ProjectsPage from './pages/ProjectsPage.js';
+import ProfilePage from './pages/ProfilePage.js';
 
 function App() {
   return (
@@ -18,6 +19,8 @@ function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/create-project" element={<ProjectsPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/project/:id" element={<div>Project Detail Page (To be implemented)</div>} />
       </Routes>
     </Router>
   );

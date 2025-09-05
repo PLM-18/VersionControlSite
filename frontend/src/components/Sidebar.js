@@ -14,11 +14,12 @@ const Sidebar = ({ user, currentPage }) => {
   const menuItems = [
     { icon: Home, label: 'Home', path: '/home', id: 'home' },
     { icon: User, label: 'Profile', path: '/profile', id: 'profile' },
-    { icon: FolderOpen, label: 'Create Project', path: '/create-project', id: 'create', action: true },
+    { icon: FolderOpen, label: 'Create Project', path: '/create-project', id: 'create'},
     { icon: Bell, label: 'Notifications', path: '/notifications', id: 'notifications' },
   ];
 
   const isActive = (path) => {
+    console.log('Current Page:', currentPage, 'Path:', path, 'Location:', location.pathname);
     if (currentPage) {
       return currentPage === path.split('/')[1];
     }

@@ -1,26 +1,9 @@
 [
   {
-    "id": "1756988600710jao2tdeae",
-    "username": "john_doe",
-    "email": "john@example.com",
-    "password": "$2b$10$rKVs.fHfKol0YdgEzYzvOOrgjToByQjYhPEBl7VbGE/COs4KwHYgK",
-    "firstName": "John",
-    "lastName": "Werner",
-    "profileImage": "/uploads/1756988805563-syncsphere-logo.png",
-    "bio": "Software Developer",
-    "location": "",
-    "website": "",
-    "birthday": "",
-    "isAdmin": false,
-    "isVerified": false,
-    "createdAt": "2025-09-04T12:23:20.710Z",
-    "lastActive": "2025-09-04T13:25:21.871Z"
-  },
-  {
-    "id": "1756991982026m6e5qcwfw",
+    "id": "1757034688858p7o6qanjo",
     "username": "plm",
     "email": "philemonmuleya@gmail.com",
-    "password": "$2b$10$BIxcRcRkjIkd8JjjyNMctu1fH3IHQfh.w7m2liWh023jQuj6n3o.m",
+    "password": "$2b$10$VPKKmOUrPiU2fRK1kuZB.egyaP52XfIPYwVqsWJAPuU./3bFeq8hC",
     "firstName": "",
     "lastName": "",
     "profileImage": null,
@@ -30,7 +13,7 @@
     "birthday": "",
     "isAdmin": false,
     "isVerified": false,
-    "createdAt": "2025-09-04T13:19:42.026Z",
-    "lastActive": "2025-09-04T13:24:42.216Z"
+    "createdAt": "2025-09-05T01:11:28.858Z",
+    "lastActive": "2025-09-05T01:25:07.814Z"
   }
 ]
