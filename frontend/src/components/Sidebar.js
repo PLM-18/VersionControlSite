@@ -19,7 +19,6 @@ const Sidebar = ({ user, currentPage }) => {
   ];
 
   const isActive = (path) => {
-    console.log('Current Page:', currentPage, 'Path:', path, 'Location:', location.pathname);
     if (currentPage) {
       return currentPage === path.split('/')[1];
     }
