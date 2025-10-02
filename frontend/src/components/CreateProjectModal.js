@@ -89,7 +89,7 @@ const CreateProjectModal = ({ onClose, onCreate }) => {
       projectData.append('projectType', formData.projectType);
 
       formData.hashtags.forEach(tag => {
-        projectData.append('hashtags[]', tag);
+        projectData.append('hashtags', tag);
       });
 
       if (formData.projectImage) {

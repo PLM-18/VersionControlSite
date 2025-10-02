@@ -198,18 +198,22 @@ export const projectAPI = {
   },
 
   createProject: async (projectData) => {
-    const formData = new FormData();
-    Object.keys(projectData).forEach(key => {
-      if (key === 'files' && Array.isArray(projectData[key])) {
-        projectData[key].forEach(file => formData.append('files', file));
-      } else if (key === 'projectImage' && projectData[key]) {
-        formData.append('projectImage', projectData[key]);
-      } else if (key === 'hashtags' && Array.isArray(projectData[key])) {
-        formData.append('hashtags', projectData[key].join(','));
-      } else if (projectData[key] !== null && projectData[key] !== undefined) {
-        formData.append(key, projectData[key]);
-      }
-    });
+    // Check if projectData is already a FormData instance
+    const formData = projectData instanceof FormData ? projectData : (() => {
+      const fd = new FormData();
+      Object.keys(projectData).forEach(key => {
+        if (key === 'files' && Array.isArray(projectData[key])) {
+          projectData[key].forEach(file => fd.append('files', file));
+        } else if (key === 'projectImage' && projectData[key]) {
+          fd.append('projectImage', projectData[key]);
+        } else if (key === 'hashtags' && Array.isArray(projectData[key])) {
+          fd.append('hashtags', projectData[key].join(','));
+        } else if (projectData[key] !== null && projectData[key] !== undefined) {
+          fd.append(key, projectData[key]);
+        }
+      });
+      return fd;
+    })();
 
     const response = await fetchWithAuthMultipart(`${API_BASE_URL}/projects`, {
       method: 'POST',
