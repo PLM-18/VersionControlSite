@@ -302,6 +302,25 @@ export const projectAPI = {
     if (!response.ok) throw new Error(data.message);
     return data;
   },
+
+  addProjectMember: async (projectId, userId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/projects/${projectId}/members`, {
+      method: 'POST',
+      body: JSON.stringify({ userId }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  removeProjectMember: async (projectId, memberId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/projects/${projectId}/members/${memberId}`, {
+      method: 'DELETE',
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
 };
 
 // Activity API

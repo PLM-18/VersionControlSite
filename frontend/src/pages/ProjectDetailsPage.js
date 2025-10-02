@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
 import Sidebar from '../components/Sidebar.js';
+import AddMemberModal from '../components/AddMemberModal.js';
 import {
   ArrowLeft,
   Download,
@@ -12,7 +13,9 @@ import {
   Lock,
   Unlock,
   File,
-  Hash
+  Hash,
+  UserPlus,
+  X
 } from 'lucide-react';
 import { projectAPI } from '../services/api.js';
 
@@ -26,6 +29,7 @@ const ProjectDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [showCheckinModal, setShowCheckinModal] = useState(false);
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [checkinData, setCheckinData] = useState({
     message: '',
     changesDescription: '',
@@ -97,6 +101,29 @@ const ProjectDetailPage = () => {
 
   const handleDownloadFile = (file) => {
     window.open(file.path, '_blank');
+  };
+
+  const handleAddMember = async (userId) => {
+    try {
+      await projectAPI.addProjectMember(id, userId);
+      await fetchProjectDetails();
+      setShowAddMemberModal(false);
+      alert('Member added successfully!');
+    } catch (err) {
+      alert(err.message || 'Failed to add member');
+    }
+  };
+
+  const handleRemoveMember = async (memberId) => {
+    if (!confirm('Are you sure you want to remove this member?')) return;
+
+    try {
+      await projectAPI.removeProjectMember(id, memberId);
+      await fetchProjectDetails();
+      alert('Member removed successfully!');
+    } catch (err) {
+      alert(err.message || 'Failed to remove member');
+    }
   };
 
   const formatDate = (dateString) => {
@@ -263,31 +290,55 @@ const ProjectDetailPage = () => {
           {activeTab === 'overview' && (
             <div className="space-y-6">
               <div className="bg-gray-800 rounded-lg p-6">
-                <h2 className="text-xl font-bold mb-4">Project Members</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold">Project Members</h2>
+                  {isOwner && (
+                    <button
+                      onClick={() => setShowAddMemberModal(true)}
+                      className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                    >
+                      <UserPlus size={18} />
+                      <span>Add Member</span>
+                    </button>
+                  )}
+                </div>
                 <div className="space-y-3">
-                  {project.members?.map((member) => (
-                    <div key={member.user._id} className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        {member.user.profileImage ? (
-                          <img
-                            src={member.user.profileImage}
-                            alt={member.user.username}
-                            className="w-10 h-10 rounded-full"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
-                            <span className="text-black font-bold">
-                              {member.user.username[0].toUpperCase()}
-                            </span>
+                  {project.members && project.members.length > 0 ? (
+                    project.members.map((member) => (
+                      <div key={member.user._id} className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          {member.user.profileImage ? (
+                            <img
+                              src={member.user.profileImage}
+                              alt={member.user.username}
+                              className="w-10 h-10 rounded-full"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                              <span className="text-black font-bold">
+                                {member.user.username[0].toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-medium">{member.user.username}</p>
+                            <p className="text-sm text-gray-400">{member.role}</p>
                           </div>
-                        )}
-                        <div>
-                          <p className="font-medium">{member.user.username}</p>
-                          <p className="text-sm text-gray-400">{member.role}</p>
                         </div>
+                        {isOwner && member.role !== 'owner' && (
+                          <button
+                            onClick={() => handleRemoveMember(member.user._id)}
+                            className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                            title="Remove member"
+                          >
+                            <X size={18} />
+                          </button>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-gray-400 text-center py-4">No members yet</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -450,6 +501,15 @@ const ProjectDetailPage = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Add Member Modal */}
+      {showAddMemberModal && (
+        <AddMemberModal
+          onClose={() => setShowAddMemberModal(false)}
+          onAdd={handleAddMember}
+          currentMembers={project.members || []}
+        />
       )}
     </div>
   );
