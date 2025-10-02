@@ -59,6 +59,7 @@ const upload = multer({
 // Public routes
 router.get('/', getAllProjects);
 router.get('/search', searchProjects);
+router.get('/user/:userId', getUserProjects);
 router.get('/:id', getProjectById);
 router.get('/:id/checkins', getProjectCheckins);
 
@@ -77,8 +78,5 @@ router.post('/:id/checkin', protect, upload.array('files', 10), checkinProject);
 // Member routes
 router.post('/:id/members', protect, addProjectMember);
 router.delete('/:id/members/:memberId', protect, removeProjectMember);
-
-// User projects
-router.get('/user/:userId', protect, getUserProjects);
 
 export default router;
