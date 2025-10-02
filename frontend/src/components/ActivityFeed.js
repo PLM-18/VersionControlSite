@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Download, User, Calendar, MessageSquare, GitCommit, Star } from 'lucide-react';
+import { activityAPI } from '../services/api.js';
 
 const ActivityFeed = ({ activeTab }) => {
+  const navigate = useNavigate();
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -12,20 +15,16 @@ const ActivityFeed = ({ activeTab }) => {
   const fetchActivities = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const type = activeTab === 'friends' ? 'local' : 'global';
-      const response = await fetch(`/api/activity?type=${type}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setActivities(data);
+      let data;
+      if (activeTab === 'local') {
+        data = await activityAPI.getLocalActivity();
+      } else {
+        data = await activityAPI.getGlobalActivity();
       }
+      setActivities(data);
     } catch (error) {
       console.error('Error fetching activities:', error);
+      setActivities([]);
     } finally {
       setLoading(false);
     }

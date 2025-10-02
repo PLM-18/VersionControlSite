@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.js';
 import BackButton from '../components/BackButton.js';
 
 const SignInPage = () => {
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -24,23 +26,10 @@ const SignInPage = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        localStorage.setItem('token', (await response.json()).token);
-        navigate('/home');
-      } else {
-        const data = await response.json();
-        setError(data.message || 'Login failed');
-      }
+      await login(formData.email, formData.password);
+      navigate('/home');
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(err.message || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -73,11 +62,11 @@ const SignInPage = () => {
               
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Username or Email Address</label>
+                  <label className="block text-sm font-medium mb-2">Email Address</label>
                   <input
-                    type="text"
-                    name="username"
-                    value={formData.username}
+                    type="email"
+                    name="email"
+                    value={formData.email}
                     onChange={handleChange}
                     placeholder="Enter your email"
                     className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent outline-none transition-colors"

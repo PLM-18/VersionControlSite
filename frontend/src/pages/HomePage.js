@@ -1,37 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.js';
 import Sidebar from '../components/Sidebar.js';
 import SearchBar from '../components/SearchBar.js';
 import ActivityFeed from '../components/ActivityFeed.js';
-import { Bell, Users, Globe, Clock, TrendingUp } from 'lucide-react';
+import { Bell, Users, Globe } from 'lucide-react';
+import { notificationAPI } from '../services/api.js';
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('friends');
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('local');
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    const mockUser = {
-      id: 1,
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'johndoe@gmail.com',
-      profileImage: null
-    };
-
-    setUser(mockUser);
-    setLoading(false);
+    fetchUnreadCount();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="loading w-8 h-8"></div>
-      </div>
-    );
-  }
+  const fetchUnreadCount = async () => {
+    try {
+      const data = await notificationAPI.getUnreadCount();
+      setUnreadCount(data.count);
+    } catch (err) {
+      console.error('Error fetching unread count:', err);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex">
@@ -46,20 +40,33 @@ const HomePage = () => {
             <SearchBar />
             
             <div className="flex items-center space-x-4">
-              <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
+              <button
+                onClick={() => navigate('/notifications')}
+                className="relative p-2 text-gray-400 hover:text-white transition-colors"
+              >
                 <Bell size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-xs font-bold">
+                    {unreadCount}
+                  </span>
+                )}
               </button>
-              
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                  </svg>
-                </div>
+
+              <button
+                onClick={() => navigate('/profile')}
+                className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+              >
+                {user?.profileImage ? (
+                  <img src={user.profileImage} alt={user.username} className="w-8 h-8 rounded-full object-cover" />
+                ) : (
+                  <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                    <span className="text-black font-bold text-sm">
+                      {user?.username?.[0]?.toUpperCase()}
+                    </span>
+                  </div>
+                )}
                 <span className="text-sm font-medium">{user?.firstName} {user?.lastName}</span>
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              </div>
+              </button>
             </div>
           </div>
         </header>
@@ -77,9 +84,9 @@ const HomePage = () => {
             <div className="flex items-center justify-center mb-8">
               <div className="bg-gray-800 rounded-lg p-1 flex space-x-1">
                 <button
-                  onClick={() => setActiveTab('friends')}
+                  onClick={() => setActiveTab('local')}
                   className={`flex items-center space-x-2 px-6 py-2 rounded-md text-sm font-medium transition-all ${
-                    activeTab === 'friends'
+                    activeTab === 'local'
                       ? 'bg-green-600 text-white shadow-lg'
                       : 'text-gray-400 hover:text-white hover:bg-gray-700'
                   }`}
@@ -87,7 +94,7 @@ const HomePage = () => {
                   <Users size={16} />
                   <span>Friends</span>
                 </button>
-                
+
                 <button
                   onClick={() => setActiveTab('global')}
                   className={`flex items-center space-x-2 px-6 py-2 rounded-md text-sm font-medium transition-all ${
@@ -98,30 +105,6 @@ const HomePage = () => {
                 >
                   <Globe size={16} />
                   <span>Global</span>
-                </button>
-                
-                <button
-                  onClick={() => setActiveTab('recent')}
-                  className={`flex items-center space-x-2 px-6 py-2 rounded-md text-sm font-medium transition-all ${
-                    activeTab === 'recent'
-                      ? 'bg-green-600 text-white shadow-lg'
-                      : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                  }`}
-                >
-                  <Clock size={16} />
-                  <span>Recent</span>
-                </button>
-                
-                <button
-                  onClick={() => setActiveTab('popular')}
-                  className={`flex items-center space-x-2 px-6 py-2 rounded-md text-sm font-medium transition-all ${
-                    activeTab === 'popular'
-                      ? 'bg-green-600 text-white shadow-lg'
-                      : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                  }`}
-                >
-                  <TrendingUp size={16} />
-                  <span>Popular</span>
                 </button>
               </div>
             </div>
