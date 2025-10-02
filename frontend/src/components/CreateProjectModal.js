@@ -3,15 +3,16 @@ import { X, Upload, Plus, Trash2 } from 'lucide-react';
 
 const CreateProjectModal = ({ onClose, onCreate }) => {
   const [formData, setFormData] = useState({
-    name: '',
+    title: '',
     description: '',
-    type: 'Web Application',
-    version: '1.0.0',
+    projectType: 'Web Application',
     hashtags: [],
-    files: []
+    files: [],
+    projectImage: null
   });
   const [tagInput, setTagInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const projectTypes = [
     'Web Application',
@@ -49,6 +50,18 @@ const CreateProjectModal = ({ onClose, onCreate }) => {
     }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData(prev => ({ ...prev, projectImage: file }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     setFormData(prev => ({
@@ -66,15 +79,32 @@ const CreateProjectModal = ({ onClose, onCreate }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim()) return;
+    if (!formData.title.trim()) return;
 
     setLoading(true);
     try {
-      await onCreate(formData);
+      const projectData = new FormData();
+      projectData.append('title', formData.title);
+      projectData.append('description', formData.description);
+      projectData.append('projectType', formData.projectType);
+
+      formData.hashtags.forEach(tag => {
+        projectData.append('hashtags[]', tag);
+      });
+
+      if (formData.projectImage) {
+        projectData.append('projectImage', formData.projectImage);
+      }
+
+      formData.files.forEach(file => {
+        projectData.append('files', file);
+      });
+
+      await onCreate(projectData);
     } catch (error) {
       console.error('Error creating project:', error);
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleKeyPress = (e) => {
@@ -107,8 +137,8 @@ const CreateProjectModal = ({ onClose, onCreate }) => {
             </label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="title"
+              value={formData.title}
               onChange={handleInputChange}
               className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:border-green-500 focus:ring-1 focus:ring-green-500"
               placeholder="Enter project name"
@@ -131,36 +161,51 @@ const CreateProjectModal = ({ onClose, onCreate }) => {
             />
           </div>
 
-          {/* Project Type and Version */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Project Type
-              </label>
-              <select
-                name="type"
-                value={formData.type}
-                onChange={handleInputChange}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-green-500 focus:ring-1 focus:ring-green-500"
-              >
-                {projectTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Version
-              </label>
-              <input
-                type="text"
-                name="version"
-                value={formData.version}
-                onChange={handleInputChange}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                placeholder="1.0.0"
-              />
+          {/* Project Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Project Type
+            </label>
+            <select
+              name="projectType"
+              value={formData.projectType}
+              onChange={handleInputChange}
+              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-green-500 focus:ring-1 focus:ring-green-500"
+            >
+              {projectTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Project Image */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Project Image
+            </label>
+            <div className="flex items-center space-x-4">
+              {imagePreview && (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-20 h-20 rounded-lg object-cover"
+                />
+              )}
+              <div className="flex-1">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                  id="image-upload"
+                />
+                <label
+                  htmlFor="image-upload"
+                  className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg cursor-pointer transition-colors inline-block"
+                >
+                  {formData.projectImage ? 'Change Image' : 'Choose Image'}
+                </label>
+              </div>
             </div>
           </div>
 
@@ -262,9 +307,9 @@ const CreateProjectModal = ({ onClose, onCreate }) => {
             </button>
             <button
               type="submit"
-              disabled={!formData.name.trim() || loading}
+              disabled={!formData.title.trim() || loading}
               className={`px-6 py-2 rounded-lg transition-colors ${
-                !formData.name.trim() || loading
+                !formData.title.trim() || loading
                   ? 'bg-gray-600 cursor-not-allowed'
                   : 'bg-green-600 hover:bg-green-700'
               }`}
