@@ -95,7 +95,6 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
           <h2 className="text-xl font-bold text-white">Edit Project</h2>
           <button
@@ -106,9 +105,7 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Project Name */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Project Name *
@@ -124,7 +121,6 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
             />
           </div>
 
-          {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Description
@@ -139,7 +135,6 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
             />
           </div>
 
-          {/* Project Type */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Project Type
@@ -156,7 +151,6 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
             </select>
           </div>
 
-          {/* Project Image */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Project Image
@@ -187,7 +181,6 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
             </div>
           </div>
 
-          {/* Hashtags */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Hashtags
@@ -232,7 +225,6 @@ const EditProjectModal = ({ project, onClose, onUpdate }) => {
             )}
           </div>
 
-          {/* Action Buttons */}
           <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-700">
             <button
               type="button"

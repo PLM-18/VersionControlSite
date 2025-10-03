@@ -35,7 +35,6 @@ const AddMemberModal = ({ onClose, onAdd, currentMembers = [] }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
           <h2 className="text-xl font-bold text-white">Add Project Member</h2>
           <button
@@ -46,7 +45,6 @@ const AddMemberModal = ({ onClose, onAdd, currentMembers = [] }) => {
           </button>
         </div>
 
-        {/* Search */}
         <div className="p-6">
           <form onSubmit={handleSearch} className="mb-6">
             <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -73,7 +71,6 @@ const AddMemberModal = ({ onClose, onAdd, currentMembers = [] }) => {
             </div>
           </form>
 
-          {/* Search Results */}
           {searchResults.length > 0 && (
             <div className="space-y-2">
               <h3 className="text-sm font-medium text-gray-300 mb-3">Search Results</h3>
@@ -123,7 +120,6 @@ const AddMemberModal = ({ onClose, onAdd, currentMembers = [] }) => {
           )}
         </div>
 
-        {/* Action Buttons */}
         <div className="flex items-center justify-end space-x-4 p-6 border-t border-gray-700">
           <button
             type="button"

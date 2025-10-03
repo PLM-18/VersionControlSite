@@ -30,7 +30,6 @@ const FileViewerModal = ({ file, onClose, onUpdate, projectId }) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9997] p-4">
       <div className="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
           <div>
             <h2 className="text-xl font-bold text-white">{file.originalName}</h2>
@@ -62,7 +61,6 @@ const FileViewerModal = ({ file, onClose, onUpdate, projectId }) => {
           </div>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-auto p-6">
           {!isEditing ? (
             <div>

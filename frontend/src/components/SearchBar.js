@@ -99,7 +99,6 @@ const SearchBar = () => {
         )}
       </div>
 
-      {/* Search Results Dropdown */}
       {isOpen && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
           {totalResults === 0 ? (
@@ -108,7 +107,6 @@ const SearchBar = () => {
             </div>
           ) : (
             <div className="py-2">
-              {/* Users Section */}
               {results.users.length > 0 && (
                 <div>
                   <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
@@ -149,7 +147,6 @@ const SearchBar = () => {
                 </div>
               )}
 
-              {/* Projects Section */}
               {results.projects.length > 0 && (
                 <div className={results.users.length > 0 ? 'mt-2 border-t border-gray-700' : ''}>
                   <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">

@@ -1,11 +1,9 @@
 const API_BASE_URL = (typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) || 'http://localhost:5000/api';
 
-// Helper function to get auth token
 const getAuthToken = () => {
   return localStorage.getItem('token');
 };
 
-// Helper function to make authenticated requests
 const fetchWithAuth = async (url, options = {}) => {
   const token = getAuthToken();
   const headers = {
@@ -23,7 +21,6 @@ const fetchWithAuth = async (url, options = {}) => {
   });
 
   if (response.status === 401) {
-    // Token expired or invalid
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     window.location.href = '/signin';
@@ -33,7 +30,6 @@ const fetchWithAuth = async (url, options = {}) => {
   return response;
 };
 
-// Helper function for multipart form data
 const fetchWithAuthMultipart = async (url, options = {}) => {
   const token = getAuthToken();
   const headers = {
@@ -59,7 +55,6 @@ const fetchWithAuthMultipart = async (url, options = {}) => {
   return response;
 };
 
-// Auth API
 export const authAPI = {
   register: async (userData) => {
     const response = await fetch(`${API_BASE_URL}/users/register`, {
@@ -84,7 +79,6 @@ export const authAPI = {
   },
 };
 
-// User API
 export const userAPI = {
   getProfile: async () => {
     const response = await fetchWithAuth(`${API_BASE_URL}/users/profile`);
@@ -178,9 +172,17 @@ export const userAPI = {
     if (!response.ok) throw new Error(data.message);
     return data;
   },
+
+  deleteProfile: async () => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/users/profile`, {
+      method: 'DELETE',
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
 };
 
-// Project API
 export const projectAPI = {
   getAllProjects: async (filters = {}) => {
     const queryParams = new URLSearchParams(filters).toString();
@@ -198,7 +200,6 @@ export const projectAPI = {
   },
 
   createProject: async (projectData) => {
-    // Check if projectData is already a FormData instance
     const formData = projectData instanceof FormData ? projectData : (() => {
       const fd = new FormData();
       Object.keys(projectData).forEach(key => {
@@ -332,7 +333,6 @@ export const projectAPI = {
   },
 };
 
-// Activity API
 export const activityAPI = {
   getGlobalActivity: async (limit = 50) => {
     const response = await fetch(`${API_BASE_URL}/activity/global?limit=${limit}`);
@@ -363,7 +363,6 @@ export const activityAPI = {
   },
 };
 
-// Notification API
 export const notificationAPI = {
   getNotifications: async () => {
     const response = await fetchWithAuth(`${API_BASE_URL}/notifications`);

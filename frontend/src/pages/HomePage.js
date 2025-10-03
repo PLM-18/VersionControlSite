@@ -29,12 +29,9 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex">
-      {/* Sidebar */}
       <Sidebar user={user} />
       
-      {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Top Bar */}
         <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
           <div className="flex items-center justify-between">
             <SearchBar />
@@ -71,16 +68,13 @@ const HomePage = () => {
           </div>
         </header>
 
-        {/* Activity Feed Section */}
         <main className="flex-1 px-6 py-8">
           <div className="max-w-4xl mx-auto">
-            {/* Activity Feed Header */}
             <div className="mb-8">
               <h1 className="text-3xl font-bold gradient-text mb-2">Activity Feed</h1>
               <p className="text-gray-400">Stay updated with your network's latest projects and activities</p>
             </div>
 
-            {/* Feed Tabs */}
             <div className="flex items-center justify-center mb-8">
               <div className="bg-gray-800 rounded-lg p-1 flex space-x-1">
                 <button
@@ -109,7 +103,6 @@ const HomePage = () => {
               </div>
             </div>
 
-            {/* Activity Feed Component */}
             <ActivityFeed activeTab={activeTab} />
           </div>
         </main>

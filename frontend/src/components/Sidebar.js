@@ -28,12 +28,10 @@ const Sidebar = ({ currentPage }) => {
 
   return (
     <div className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col">
-      {/* Logo */}
       <div className="p-6 border-b border-gray-700">
         <h1 className="text-2xl font-bold gradient-text">SyncSphere</h1>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 px-4 py-6">
         <ul className="space-y-2">
           {menuItems.map(({ icon: Icon, label, path, id, action }) => (
@@ -56,7 +54,6 @@ const Sidebar = ({ currentPage }) => {
         </ul>
       </nav>
 
-      {/* User Profile Section */}
       <div className="p-4 border-t border-gray-700">
         <div className="flex items-center space-x-3">
           {user?.profileImage ? (

@@ -90,6 +90,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const deleteProfile = async () => {
+    try {
+      await userAPI.deleteProfile();
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
+      return { message: 'Profile deleted successfully' };
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -98,6 +111,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateUserProfile,
+    deleteProfile,
     isAuthenticated: !!user,
   };
 

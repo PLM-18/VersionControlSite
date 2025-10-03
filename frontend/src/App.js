@@ -12,7 +12,6 @@ import ProfilePage from './pages/ProfilePage.js';
 import ProjectDetailPage from './pages/ProjectDetailsPage.js';
 import NotificationsPage from './pages/NotificationsPage.js';
 
-// Protected Route wrapper
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 

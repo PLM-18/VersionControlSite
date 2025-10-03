@@ -14,14 +14,15 @@ import {
   UserMinus,
   UserCheck,
   X,
-  Upload
+  Upload,
+  Trash2
 } from 'lucide-react';
 import { userAPI, projectAPI } from '../services/api.js';
 
 const ProfilePage = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const { user: currentUser, updateUserProfile } = useAuth();
+  const { user: currentUser, updateUserProfile, deleteProfile } = useAuth();
   const toast = useToast();
 
   const [profile, setProfile] = useState(null);
@@ -154,6 +155,24 @@ const ProfilePage = () => {
     setEditData({ ...editData, profileImage: e.target.files[0] });
   };
 
+  const handleDeleteProfile = () => {
+    setConfirmAction({
+      title: 'Delete Profile',
+      message: 'Are you sure you want to delete your profile? This action cannot be undone and all your data will be permanently removed.',
+      confirmText: 'Delete Profile',
+      confirmColor: 'red',
+      onConfirm: async () => {
+        try {
+          await deleteProfile();
+          toast.success('Profile deleted successfully');
+          navigate('/');
+        } catch (err) {
+          toast.error(err.message || 'Failed to delete profile');
+        }
+      }
+    });
+  };
+
   const isFriend = friends.some(f => f._id === userId);
 
   if (loading) {
@@ -177,14 +196,12 @@ const ProfilePage = () => {
       <Sidebar />
 
       <div className="flex-1 overflow-auto">
-        {/* Profile Header */}
         <div className="bg-gradient-to-r from-green-600 to-blue-600 h-48"></div>
 
         <div className="max-w-6xl mx-auto px-6 -mt-20">
           <div className="bg-gray-800 rounded-lg p-6 shadow-xl">
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-6">
-                {/* Profile Image */}
                 {profile.profileImage ? (
                   <img
                     src={profile.profileImage}
@@ -243,16 +260,24 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex flex-col space-y-2 pt-4">
                 {isOwnProfile ? (
-                  <button
-                    onClick={() => setIsEditModalOpen(true)}
-                    className="flex items-center space-x-2 px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
-                  >
-                    <Edit3 size={16} />
-                    <span>Edit Profile</span>
-                  </button>
+                  <>
+                    <button
+                      onClick={() => setIsEditModalOpen(true)}
+                      className="flex items-center space-x-2 px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                    >
+                      <Edit3 size={16} />
+                      <span>Edit Profile</span>
+                    </button>
+                    <button
+                      onClick={handleDeleteProfile}
+                      className="flex items-center space-x-2 px-6 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                    >
+                      <Trash2 size={16} />
+                      <span>Delete Profile</span>
+                    </button>
+                  </>
                 ) : (
                   <>
                     {isFriend ? (
@@ -278,7 +303,6 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Tabs */}
           <div className="mt-6 bg-gray-800 rounded-lg">
             <div className="flex border-b border-gray-700">
               <button
@@ -317,7 +341,6 @@ const ProfilePage = () => {
               )}
             </div>
 
-            {/* Tab Content */}
             <div className="p-6">
               {activeTab === 'projects' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -455,7 +478,6 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {/* Edit Profile Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -553,7 +575,6 @@ const ProfilePage = () => {
         </div>
       )}
 
-      {/* Confirm Modal */}
       {confirmAction && (
         <ConfirmModal
           isOpen={!!confirmAction}

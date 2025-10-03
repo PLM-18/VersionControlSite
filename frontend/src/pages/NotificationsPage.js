@@ -103,7 +103,6 @@ const NotificationsPage = () => {
       confirmColor: 'red',
       onConfirm: async () => {
         try {
-          // Delete each notification
           await Promise.all(notifications.map(n => notificationAPI.deleteNotification(n._id)));
           setNotifications([]);
           toast.success('All notifications cleared');
@@ -149,7 +148,6 @@ const NotificationsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex">
-      {/* Sidebar */}
       <Sidebar currentPage="notifications" />
       
       <div className="flex-1 flex flex-col">
@@ -261,12 +259,10 @@ const NotificationsPage = () => {
                       }`}
                     >
                       <div className="flex items-start space-x-4">
-                        {/* Icon */}
                         <div className={`p-2 rounded-lg ${colors.bg}`}>
                           <IconComponent size={20} className={colors.icon} />
                         </div>
 
-                        {/* Content */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -293,7 +289,6 @@ const NotificationsPage = () => {
                               </div>
                             </div>
 
-                            {/* Actions */}
                             <div className="flex items-center space-x-2 ml-4">
                               {!notification.read && (
                                 <button

@@ -243,7 +243,6 @@ const ProjectDetailPage = () => {
       <Sidebar />
 
       <div className="flex-1 overflow-auto">
-        {/* Header */}
         <div className="bg-gray-800 border-b border-gray-700 p-6">
           <div className="max-w-6xl mx-auto">
             <button
@@ -295,7 +294,6 @@ const ProjectDetailPage = () => {
               </div>
 
               <div className="flex flex-col space-y-3">
-                {/* Owner Actions */}
                 {isOwner && (
                   <div className="flex items-center space-x-2">
                     <button
@@ -317,7 +315,6 @@ const ProjectDetailPage = () => {
                   </div>
                 )}
 
-                {/* Checkout Status */}
                 {isCheckedOut ? (
                   <div className="bg-orange-500/20 border border-orange-500/50 rounded-lg p-4">
                     <div className="flex items-center text-orange-400 mb-2">
@@ -351,7 +348,6 @@ const ProjectDetailPage = () => {
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="bg-gray-800 border-b border-gray-700">
           <div className="max-w-6xl mx-auto px-6">
             <div className="flex space-x-8">
@@ -389,7 +385,6 @@ const ProjectDetailPage = () => {
           </div>
         </div>
 
-        {/* Content */}
         <div className="max-w-6xl mx-auto px-6 py-8">
           {activeTab === 'overview' && (
             <div className="space-y-6">
@@ -550,7 +545,6 @@ const ProjectDetailPage = () => {
         </div>
       </div>
 
-      {/* Check-in Modal */}
       {showCheckinModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -625,7 +619,6 @@ const ProjectDetailPage = () => {
         </div>
       )}
 
-      {/* Add Member Modal */}
       {showAddMemberModal && (
         <AddMemberModal
           onClose={() => setShowAddMemberModal(false)}
@@ -634,7 +627,6 @@ const ProjectDetailPage = () => {
         />
       )}
 
-      {/* Edit Project Modal */}
       {showEditModal && (
         <EditProjectModal
           project={project}
@@ -643,7 +635,6 @@ const ProjectDetailPage = () => {
         />
       )}
 
-      {/* File Viewer Modal */}
       {showFileViewer && selectedFile && (
         <FileViewerModal
           file={selectedFile}
@@ -656,7 +647,6 @@ const ProjectDetailPage = () => {
         />
       )}
 
-      {/* Confirm Modal */}
       {confirmAction && (
         <ConfirmModal
           isOpen={!!confirmAction}
