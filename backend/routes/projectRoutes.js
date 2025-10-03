@@ -11,7 +11,8 @@ import {
   removeProjectMember,
   getProjectCheckins,
   searchProjects,
-  getUserProjects
+  getUserProjects,
+  deleteFile
 } from '../controllers/projectController.js';
 import { protect } from '../middleware/auth.js';
 import multer from 'multer';
@@ -78,5 +79,8 @@ router.post('/:id/checkin', protect, upload.array('files', 10), checkinProject);
 // Member routes
 router.post('/:id/members', protect, addProjectMember);
 router.delete('/:id/members/:memberId', protect, removeProjectMember);
+
+// File routes
+router.delete('/:id/files/:fileId', protect, deleteFile);
 
 export default router;

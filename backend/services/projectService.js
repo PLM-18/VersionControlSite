@@ -310,6 +310,26 @@ class ProjectService {
 
     return projects;
   }
+
+  async deleteFile(projectId, userId, fileId) {
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      throw new Error('Project not found');
+    }
+
+    // Check if user is owner or admin
+    const member = project.members.find(m => m.user.toString() === userId.toString());
+    if (!member || (member.role !== 'owner' && member.role !== 'admin')) {
+      throw new Error('Only project owner or admin can delete files');
+    }
+
+    // Remove file from array
+    project.files = project.files.filter(f => f._id.toString() !== fileId);
+    await project.save();
+
+    return project;
+  }
 }
 
 export default new ProjectService();

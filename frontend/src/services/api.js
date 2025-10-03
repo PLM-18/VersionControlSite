@@ -321,6 +321,15 @@ export const projectAPI = {
     if (!response.ok) throw new Error(data.message);
     return data;
   },
+
+  deleteFile: async (projectId, fileId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/projects/${projectId}/files/${fileId}`, {
+      method: 'DELETE',
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
 };
 
 // Activity API

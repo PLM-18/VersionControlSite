@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
+import { useToast } from '../context/ToastContext.js';
 import Sidebar from '../components/Sidebar.js';
 import CreateProjectModal from '../components/CreateProjectModal.js';
 import { Plus, Filter, Search, Grid, List, Hash } from 'lucide-react';
@@ -9,6 +10,7 @@ import { projectAPI } from '../services/api.js';
 const ProjectsPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const toast = useToast();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,9 +44,10 @@ const ProjectsPage = () => {
       await projectAPI.createProject(projectData);
       await fetchProjects();
       setShowCreateModal(false);
+      toast.success('Project created successfully!');
     } catch (err) {
       console.error('Error creating project:', err);
-      alert(err.message || 'Failed to create project');
+      toast.error(err.message || 'Failed to create project');
     }
   };
 

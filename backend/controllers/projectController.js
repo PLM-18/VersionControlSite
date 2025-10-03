@@ -220,3 +220,19 @@ export const getUserProjects = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+// @desc    Delete file from project
+// @route   DELETE /api/projects/:id/files/:fileId
+// @access  Private
+export const deleteFile = async (req, res) => {
+  try {
+    const project = await projectService.deleteFile(
+      req.params.id,
+      req.user._id,
+      req.params.fileId
+    );
+    res.json(project);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};

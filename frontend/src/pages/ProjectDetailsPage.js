@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
+import { useToast } from '../context/ToastContext.js';
 import Sidebar from '../components/Sidebar.js';
 import AddMemberModal from '../components/AddMemberModal.js';
+import EditProjectModal from '../components/EditProjectModal.js';
+import FileViewerModal from '../components/FileViewerModal.js';
+import ConfirmModal from '../components/ConfirmModal.js';
 import {
   ArrowLeft,
   Download,
@@ -15,7 +19,10 @@ import {
   File,
   Hash,
   UserPlus,
-  X
+  X,
+  Edit,
+  Trash2,
+  Settings
 } from 'lucide-react';
 import { projectAPI } from '../services/api.js';
 
@@ -23,6 +30,7 @@ const ProjectDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const toast = useToast();
 
   const [project, setProject] = useState(null);
   const [checkins, setCheckins] = useState([]);
@@ -30,6 +38,10 @@ const ProjectDetailPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [showCheckinModal, setShowCheckinModal] = useState(false);
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showFileViewer, setShowFileViewer] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [confirmAction, setConfirmAction] = useState(null);
   const [checkinData, setCheckinData] = useState({
     message: '',
     changesDescription: '',
@@ -68,9 +80,9 @@ const ProjectDetailPage = () => {
     try {
       await projectAPI.checkoutProject(id);
       await fetchProjectDetails();
-      alert('Project checked out successfully!');
+      toast.success('Project checked out successfully!');
     } catch (err) {
-      alert(err.message || 'Failed to checkout project');
+      toast.error(err.message || 'Failed to checkout project');
     }
   };
 
@@ -89,9 +101,9 @@ const ProjectDetailPage = () => {
       setCheckinData({ message: '', changesDescription: '', files: [], hashtags: '' });
       await fetchProjectDetails();
       await fetchProjectCheckins();
-      alert('Changes checked in successfully!');
+      toast.success('Changes checked in successfully!');
     } catch (err) {
-      alert(err.message || 'Failed to checkin changes');
+      toast.error(err.message || 'Failed to checkin changes');
     }
   };
 
@@ -108,21 +120,91 @@ const ProjectDetailPage = () => {
       await projectAPI.addProjectMember(id, userId);
       await fetchProjectDetails();
       setShowAddMemberModal(false);
-      alert('Member added successfully!');
+      toast.success('Member added successfully!');
     } catch (err) {
-      alert(err.message || 'Failed to add member');
+      toast.error(err.message || 'Failed to add member');
     }
   };
 
-  const handleRemoveMember = async (memberId) => {
-    if (!confirm('Are you sure you want to remove this member?')) return;
+  const handleRemoveMember = (memberId) => {
+    setConfirmAction({
+      title: 'Remove Member',
+      message: 'Are you sure you want to remove this member from the project?',
+      confirmText: 'Remove',
+      confirmColor: 'red',
+      onConfirm: async () => {
+        try {
+          await projectAPI.removeProjectMember(id, memberId);
+          await fetchProjectDetails();
+          toast.success('Member removed successfully!');
+        } catch (err) {
+          toast.error(err.message || 'Failed to remove member');
+        }
+      }
+    });
+  };
 
+  const handleDeleteProject = () => {
+    setConfirmAction({
+      title: 'Delete Project',
+      message: 'Are you sure you want to delete this project? This action cannot be undone.',
+      confirmText: 'Delete',
+      confirmColor: 'red',
+      onConfirm: async () => {
+        try {
+          await projectAPI.deleteProject(id);
+          toast.success('Project deleted successfully!');
+          navigate('/projects');
+        } catch (err) {
+          toast.error(err.message || 'Failed to delete project');
+        }
+      }
+    });
+  };
+
+  const handleUpdateProject = async (updateData) => {
     try {
-      await projectAPI.removeProjectMember(id, memberId);
+      await projectAPI.updateProject(id, updateData);
       await fetchProjectDetails();
-      alert('Member removed successfully!');
+      setShowEditModal(false);
+      toast.success('Project updated successfully!');
     } catch (err) {
-      alert(err.message || 'Failed to remove member');
+      toast.error(err.message || 'Failed to update project');
+    }
+  };
+
+  const handleDeleteFile = (fileId) => {
+    setConfirmAction({
+      title: 'Delete File',
+      message: 'Are you sure you want to delete this file?',
+      confirmText: 'Delete',
+      confirmColor: 'red',
+      onConfirm: async () => {
+        try {
+          await projectAPI.deleteFile(id, fileId);
+          await fetchProjectDetails();
+          toast.success('File deleted successfully!');
+        } catch (err) {
+          toast.error(err.message || 'Failed to delete file');
+        }
+      }
+    });
+  };
+
+  const handleFileClick = (file) => {
+    setSelectedFile(file);
+    setShowFileViewer(true);
+  };
+
+  const handleFileUpdate = async (projectId, updateData) => {
+    try {
+      await projectAPI.checkinProject(projectId, updateData);
+      await fetchProjectDetails();
+      await fetchProjectCheckins();
+      setShowFileViewer(false);
+      toast.success('File updated successfully!');
+    } catch (err) {
+      toast.error(err.message || 'Failed to update file');
     }
   };
 
@@ -213,6 +295,28 @@ const ProjectDetailPage = () => {
               </div>
 
               <div className="flex flex-col space-y-3">
+                {/* Owner Actions */}
+                {isOwner && (
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setShowEditModal(true)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
+                      title="Edit Project"
+                    >
+                      <Edit size={18} />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={handleDeleteProject}
+                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
+                      title="Delete Project"
+                    >
+                      <Trash2 size={18} />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                )}
+
                 {/* Checkout Status */}
                 {isCheckedOut ? (
                   <div className="bg-orange-500/20 border border-orange-500/50 rounded-lg p-4">
@@ -350,8 +454,8 @@ const ProjectDetailPage = () => {
               {project.files && project.files.length > 0 ? (
                 <div className="space-y-2">
                   {project.files.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
-                      <div className="flex items-center space-x-3">
+                    <div key={index} className="flex items-center justify-between p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors cursor-pointer group">
+                      <div className="flex items-center space-x-3 flex-1" onClick={() => handleFileClick(file)}>
                         <File size={20} className="text-blue-400" />
                         <div>
                           <p className="font-medium">{file.originalName}</p>
@@ -360,12 +464,30 @@ const ProjectDetailPage = () => {
                           </p>
                         </div>
                       </div>
-                      <button
-                        onClick={() => handleDownloadFile(file)}
-                        className="p-2 text-green-400 hover:bg-gray-800 rounded-lg transition-colors"
-                      >
-                        <Download size={20} />
-                      </button>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownloadFile(file);
+                          }}
+                          className="p-2 text-green-400 hover:bg-gray-800 rounded-lg transition-colors"
+                          title="Download"
+                        >
+                          <Download size={20} />
+                        </button>
+                        {isOwner && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteFile(file._id);
+                            }}
+                            className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                            title="Delete"
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -509,6 +631,41 @@ const ProjectDetailPage = () => {
           onClose={() => setShowAddMemberModal(false)}
           onAdd={handleAddMember}
           currentMembers={project.members || []}
+        />
+      )}
+
+      {/* Edit Project Modal */}
+      {showEditModal && (
+        <EditProjectModal
+          project={project}
+          onClose={() => setShowEditModal(false)}
+          onUpdate={handleUpdateProject}
+        />
+      )}
+
+      {/* File Viewer Modal */}
+      {showFileViewer && selectedFile && (
+        <FileViewerModal
+          file={selectedFile}
+          projectId={id}
+          onClose={() => {
+            setShowFileViewer(false);
+            setSelectedFile(null);
+          }}
+          onUpdate={handleFileUpdate}
+        />
+      )}
+
+      {/* Confirm Modal */}
+      {confirmAction && (
+        <ConfirmModal
+          isOpen={!!confirmAction}
+          onClose={() => setConfirmAction(null)}
+          onConfirm={confirmAction.onConfirm}
+          title={confirmAction.title}
+          message={confirmAction.message}
+          confirmText={confirmAction.confirmText}
+          confirmColor={confirmAction.confirmColor}
         />
       )}
     </div>

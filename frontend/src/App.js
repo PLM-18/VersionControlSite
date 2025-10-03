@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext.js';
+import { ToastProvider } from './context/ToastContext.js';
 import LandingPage from './pages/LandingPage.js';
 import SignUpPage from './pages/SignUpPage.js';
 import SignInPage from './pages/SignInPage.js';
@@ -86,9 +87,11 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
+      <ToastProvider>
+        <Router>
+          <AppRoutes />
+        </Router>
+      </ToastProvider>
     </AuthProvider>
   );
 }
