@@ -5,6 +5,7 @@ import { ToastProvider } from './context/ToastContext.js';
 import LandingPage from './pages/LandingPage.js';
 import SignUpPage from './pages/SignUpPage.js';
 import SignInPage from './pages/SignInPage.js';
+import UsernameSetupPage from './pages/UsernameSetupPage.js';
 import HomePage from './pages/HomePage.js';
 import ProjectsPage from './pages/ProjectsPage.js';
 import ProfilePage from './pages/ProfilePage.js';
@@ -32,6 +33,7 @@ function AppRoutes() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/signin" element={<SignInPage />} />
+      <Route path="/setup-username" element={<UsernameSetupPage />} />
       <Route
         path="/home"
         element={

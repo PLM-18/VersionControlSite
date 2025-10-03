@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import { useToast } from "../context/ToastContext.js";
+import ConfirmModal from "../components/ConfirmModal.js";
 import {
   MoreHorizontal,
   Download,
@@ -13,25 +15,32 @@ import {
 
 const ProjectCard = ({ project, viewMode, onUpdate }) => {
   const navigate = useNavigate();
+  const toast = useToast();
   const [showMenu, setShowMenu] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
 
   const handleProjectClick = (e) => {
-    if (e.target.closest('button')) {
+    if (e.target.closest("button")) {
       return;
     }
     navigate(`/project/${project.id}`);
   };
 
   const handleDelete = () => {
-    if (!window.confirm("Are you sure you want to delete this project?"))
-      return;
-
-    setIsDeleting(true);
-    setTimeout(() => {
-      onUpdate();
-      setIsDeleting(false);
-    }, 500);
+    setConfirmAction({
+      title: "Delete Project",
+      message: `Are you sure you want to delete the project "${project.name}"? This action cannot be undone.`,
+      confirmText: "Delete",
+      confirmColor: "red",
+      onConfirm: async () => {
+        setIsDeleting(true);
+        setTimeout(() => {
+          onUpdate();
+          setIsDeleting(false);
+        }, 500);
+      },
+    });
   };
 
   const handleCheckOut = () => {
@@ -39,7 +48,7 @@ const ProjectCard = ({ project, viewMode, onUpdate }) => {
   };
 
   const handleDownload = () => {
-    alert(`Downloading ${project.name}.zip`);
+    toast.info(`Downloading ${project.name}.zip`);
   };
 
   const formatDate = (dateString) => {
@@ -98,7 +107,7 @@ const ProjectCard = ({ project, viewMode, onUpdate }) => {
               </button>
               {showMenu && (
                 <div className="absolute right-0 top-full mt-1 bg-gray-700 border border-gray-600 rounded-lg shadow-xl z-10 w-48">
-                  <button 
+                  <button
                     onClick={(e) => {
                       e.stopPropagation();
                       // Navigate to edit
@@ -129,8 +138,8 @@ const ProjectCard = ({ project, viewMode, onUpdate }) => {
   }
 
   return (
-    <div 
-      className="bg-gray-800 rounded-lg overflow-hidden card-hover cursor-pointer" 
+    <div
+      className="bg-gray-800 rounded-lg overflow-hidden card-hover cursor-pointer"
       onClick={handleProjectClick}
     >
       <div className="p-6">
@@ -155,7 +164,7 @@ const ProjectCard = ({ project, viewMode, onUpdate }) => {
             </button>
             {showMenu && (
               <div className="absolute right-0 top-full mt-1 bg-gray-700 border border-gray-600 rounded-lg shadow-xl z-10 w-48">
-                <button 
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
                     navigate(`/project/${project.id}`);
@@ -165,7 +174,7 @@ const ProjectCard = ({ project, viewMode, onUpdate }) => {
                   <ExternalLink size={14} />
                   <span>View Details</span>
                 </button>
-                <button 
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
@@ -271,6 +280,19 @@ const ProjectCard = ({ project, viewMode, onUpdate }) => {
           )}
         </div>
       </div>
+
+      {/* Confirm Modal */}
+      {confirmAction && (
+        <ConfirmModal
+          isOpen={!!confirmAction}
+          onClose={() => setConfirmAction(null)}
+          onConfirm={confirmAction.onConfirm}
+          title={confirmAction.title}
+          message={confirmAction.message}
+          confirmText={confirmAction.confirmText}
+          confirmColor={confirmAction.confirmColor}
+        />
+      )}
     </div>
   );
 };

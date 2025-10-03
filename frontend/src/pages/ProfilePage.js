@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
+import { useToast } from '../context/ToastContext.js';
 import Sidebar from '../components/Sidebar.js';
+import ConfirmModal from '../components/ConfirmModal.js';
 import {
   Edit3,
   MapPin,
@@ -20,6 +22,7 @@ const ProfilePage = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
   const { user: currentUser, updateUserProfile } = useAuth();
+  const toast = useToast();
 
   const [profile, setProfile] = useState(null);
   const [projects, setProjects] = useState([]);
@@ -28,6 +31,7 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('projects');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
   const [editData, setEditData] = useState({
     firstName: '',
     lastName: '',
@@ -93,18 +97,18 @@ const ProfilePage = () => {
       await updateUserProfile(updateData);
       setIsEditModalOpen(false);
       await fetchProfileData();
-      alert('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     } catch (err) {
-      alert(err.message || 'Failed to update profile');
+      toast.error(err.message || 'Failed to update profile');
     }
   };
 
   const handleSendFriendRequest = async () => {
     try {
       await userAPI.sendFriendRequest(userId);
-      alert('Friend request sent!');
+      toast.success('Friend request sent!');
     } catch (err) {
-      alert(err.message || 'Failed to send friend request');
+      toast.error(err.message || 'Failed to send friend request');
     }
   };
 
@@ -112,9 +116,9 @@ const ProfilePage = () => {
     try {
       await userAPI.acceptFriendRequest(requestId);
       await fetchProfileData();
-      alert('Friend request accepted!');
+      toast.success('Friend request accepted!');
     } catch (err) {
-      alert(err.message || 'Failed to accept friend request');
+      toast.error(err.message || 'Failed to accept friend request');
     }
   };
 
@@ -122,21 +126,28 @@ const ProfilePage = () => {
     try {
       await userAPI.rejectFriendRequest(requestId);
       await fetchProfileData();
+      toast.success('Friend request rejected');
     } catch (err) {
-      alert(err.message || 'Failed to reject friend request');
+      toast.error(err.message || 'Failed to reject friend request');
     }
   };
 
-  const handleUnfriend = async (friendId) => {
-    if (window.confirm('Are you sure you want to unfriend this user?')) {
-      try {
-        await userAPI.unfriend(friendId);
-        await fetchProfileData();
-        alert('Unfriended successfully');
-      } catch (err) {
-        alert(err.message || 'Failed to unfriend');
+  const handleUnfriend = (friendId) => {
+    setConfirmAction({
+      title: 'Unfriend User',
+      message: 'Are you sure you want to remove this user from your friends?',
+      confirmText: 'Unfriend',
+      confirmColor: 'red',
+      onConfirm: async () => {
+        try {
+          await userAPI.unfriend(friendId);
+          await fetchProfileData();
+          toast.success('Unfriended successfully');
+        } catch (err) {
+          toast.error(err.message || 'Failed to unfriend');
+        }
       }
-    }
+    });
   };
 
   const handleImageChange = (e) => {
@@ -540,6 +551,19 @@ const ProfilePage = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Confirm Modal */}
+      {confirmAction && (
+        <ConfirmModal
+          isOpen={!!confirmAction}
+          onClose={() => setConfirmAction(null)}
+          onConfirm={confirmAction.onConfirm}
+          title={confirmAction.title}
+          message={confirmAction.message}
+          confirmText={confirmAction.confirmText}
+          confirmColor={confirmAction.confirmColor}
+        />
       )}
     </div>
   );

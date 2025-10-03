@@ -1,23 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.js';
+import { useToast } from '../context/ToastContext.js';
 import BackButton from '../components/BackButton.js';
 
 const UsernameSetupPage = () => {
   const [username, setUsername] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  
+  const { login } = useAuth();
+  const toast = useToast();
+
   const { email, password } = location.state || {};
+
+  useEffect(() => {
+    // If no email/password in state, redirect back to landing
+    if (!email || !password) {
+      toast.warning('Please start from the sign up form');
+      navigate('/');
+    }
+  }, [email, password, navigate, toast]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     try {
-      const response = await fetch('/api/register', {
+      const response = await fetch('http://localhost:5000/api/users/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -25,18 +35,25 @@ const UsernameSetupPage = () => {
         body: JSON.stringify({
           username,
           email,
-          password
+          password,
+          firstName: '',
+          lastName: ''
         }),
       });
 
-      if (response.ok) {
-        navigate('/home');
-      } else {
-        const data = await response.json();
-        setError(data.message || 'Username setup failed');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
       }
+
+      // Auto-login after successful registration
+      await login({ email, password });
+
+      toast.success('Account created successfully! Welcome to SyncSphere!');
+      navigate('/home');
     } catch (err) {
-      setError('Network error. Please try again.');
+      toast.error(err.message || 'Failed to create account');
     } finally {
       setLoading(false);
     }
@@ -81,10 +98,6 @@ const UsernameSetupPage = () => {
                     Username must be 3-20 characters long and contain only letters, numbers, and underscores
                   </p>
                 </div>
-                
-                {error && (
-                  <div className="text-red-400 text-sm text-center">{error}</div>
-                )}
                 
                 <button
                   type="submit"

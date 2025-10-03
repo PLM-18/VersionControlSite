@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
+import { useToast } from '../context/ToastContext.js';
 import Sidebar from '../components/Sidebar.js';
 import SearchBar from '../components/SearchBar.js';
+import ConfirmModal from '../components/ConfirmModal.js';
 import {
   Bell,
   X,
@@ -20,9 +22,11 @@ import { notificationAPI } from '../services/api.js';
 const NotificationsPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
   const [filter, setFilter] = useState('all');
+  const [confirmAction, setConfirmAction] = useState(null);
 
   const getNotificationIcon = (type) => {
     switch (type) {
@@ -91,16 +95,24 @@ const NotificationsPage = () => {
     }
   };
 
-  const handleClearAll = async () => {
-    if (window.confirm('Are you sure you want to clear all notifications?')) {
-      try {
-        // Delete each notification
-        await Promise.all(notifications.map(n => notificationAPI.deleteNotification(n._id)));
-        setNotifications([]);
-      } catch (err) {
-        console.error('Error clearing notifications:', err);
+  const handleClearAll = () => {
+    setConfirmAction({
+      title: 'Clear All Notifications',
+      message: 'Are you sure you want to clear all notifications? This action cannot be undone.',
+      confirmText: 'Clear All',
+      confirmColor: 'red',
+      onConfirm: async () => {
+        try {
+          // Delete each notification
+          await Promise.all(notifications.map(n => notificationAPI.deleteNotification(n._id)));
+          setNotifications([]);
+          toast.success('All notifications cleared');
+        } catch (err) {
+          console.error('Error clearing notifications:', err);
+          toast.error('Failed to clear notifications');
+        }
       }
-    }
+    });
   };
 
   const formatTimestamp = (dateString) => {
@@ -331,6 +343,19 @@ const NotificationsPage = () => {
           </div>
         </main>
       </div>
+
+      {/* Confirm Modal */}
+      {confirmAction && (
+        <ConfirmModal
+          isOpen={!!confirmAction}
+          onClose={() => setConfirmAction(null)}
+          onConfirm={confirmAction.onConfirm}
+          title={confirmAction.title}
+          message={confirmAction.message}
+          confirmText={confirmAction.confirmText}
+          confirmColor={confirmAction.confirmColor}
+        />
+      )}
     </div>
   );
 };
