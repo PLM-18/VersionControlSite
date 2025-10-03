@@ -17,13 +17,11 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Check if user is logged in on mount
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
 
     if (token && savedUser) {
       setUser(JSON.parse(savedUser));
-      // Optionally fetch fresh user data
       fetchUserProfile();
     } else {
       setLoading(false);
@@ -38,7 +36,6 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     } catch (err) {
       console.error('Error fetching profile:', err);
-      // If token is invalid, clear storage
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       setUser(null);

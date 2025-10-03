@@ -5,11 +5,15 @@ import { useToast } from '../context/ToastContext.js';
 import BackButton from '../components/BackButton.js';
 
 const UsernameSetupPage = () => {
-  const [username, setUsername] = useState('');
+  const [formData, setFormData] = useState({
+    username: '',
+    firstName: '',
+    lastName: ''
+  });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { register } = useAuth();
   const toast = useToast();
 
   const { email, password } = location.state || {};
@@ -22,34 +26,25 @@ const UsernameSetupPage = () => {
     }
   }, [email, password, navigate, toast]);
 
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username,
+      await register({
+          username: formData.username,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
           email,
-          password,
-          firstName: '',
-          lastName: ''
-        }),
+          password
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
-      }
-
-      // Auto-login after successful registration
-      await login({ email, password });
-
       toast.success('Account created successfully! Welcome to SyncSphere!');
       navigate('/home');
     } catch (err) {
@@ -79,13 +74,41 @@ const UsernameSetupPage = () => {
               <h2 className="text-3xl font-bold text-center mb-2">Choose Your Username</h2>
               <p className="text-gray-400 text-center mb-8">Pick a unique username for your SyncSphere account</p>
               
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">First Name</label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      placeholder="First name"
+                      className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent outline-none transition-colors"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Last Name</label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      placeholder="Last name"
+                      className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent outline-none transition-colors"
+                      required
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium mb-2">Username</label>
                   <input
                     type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
                     placeholder="Enter your username"
                     className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent outline-none transition-colors"
                     required
@@ -98,10 +121,10 @@ const UsernameSetupPage = () => {
                     Username must be 3-20 characters long and contain only letters, numbers, and underscores
                   </p>
                 </div>
-                
+
                 <button
                   type="submit"
-                  disabled={loading || !username.trim()}
+                  disabled={loading || !formData.username.trim() || !formData.firstName.trim() || !formData.lastName.trim()}
                   className="w-full bg-green-400 text-black py-3 rounded-lg font-semibold hover:bg-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Setting up...' : 'Complete Setup'}
