@@ -1,20 +1,21 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, User, FolderOpen, Bell, Plus, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext.js';
+import { Home, User, FolderOpen, Bell, LogOut } from 'lucide-react';
 
-const Sidebar = ({ user, currentPage }) => {
+const Sidebar = ({ currentPage }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/');
+    logout();
   };
 
   const menuItems = [
     { icon: Home, label: 'Home', path: '/home', id: 'home' },
     { icon: User, label: 'Profile', path: '/profile', id: 'profile' },
-    { icon: FolderOpen, label: 'Create Project', path: '/create-project', id: 'create'},
+    { icon: FolderOpen, label: 'Projects', path: '/projects', id: 'projects'},
     { icon: Bell, label: 'Notifications', path: '/notifications', id: 'notifications' },
   ];
 
@@ -27,12 +28,10 @@ const Sidebar = ({ user, currentPage }) => {
 
   return (
     <div className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col">
-      {/* Logo */}
       <div className="p-6 border-b border-gray-700">
         <h1 className="text-2xl font-bold gradient-text">SyncSphere</h1>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 px-4 py-6">
         <ul className="space-y-2">
           {menuItems.map(({ icon: Icon, label, path, id, action }) => (
@@ -55,14 +54,21 @@ const Sidebar = ({ user, currentPage }) => {
         </ul>
       </nav>
 
-      {/* User Profile Section */}
       <div className="p-4 border-t border-gray-700">
-        <div className="flex items-center space-x-3 mb-4">
-          <img 
-            src={user?.profileImage || '/api/placeholder/40/40'} 
-            alt={user?.firstName} 
-            className="w-10 h-10 rounded-full"
-          />
+        <div className="flex items-center space-x-3">
+          {user?.profileImage ? (
+            <img
+              src={user.profileImage}
+              alt={user.username}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+              <span className="text-black font-bold">
+                {user?.username?.[0]?.toUpperCase()}
+              </span>
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white truncate">
               {user?.firstName} {user?.lastName}

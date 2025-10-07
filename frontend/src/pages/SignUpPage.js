@@ -1,10 +1,14 @@
+// 27 - u23629810
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.js';
 import BackButton from '../components/BackButton.js';
 
 const SignUpPage = () => {
   const [formData, setFormData] = useState({
     username: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -12,6 +16,7 @@ const SignUpPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -29,30 +34,24 @@ const SignUpPage = () => {
       return;
     }
 
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password
-        }),
+      await register({
+        username: formData.username,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password
       });
-
-      if (response.ok) {
-        localStorage.setItem('token', (await response.json()).token);
-        navigate('/home');
-      } else {
-        const data = await response.json();
-        setError(data.message || 'Registration failed');
-      }
+      navigate('/home');
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(err.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -78,7 +77,7 @@ const SignUpPage = () => {
               <h2 className="text-3xl font-bold text-center mb-2">Join SyncSphere</h2>
               <p className="text-gray-400 text-center mb-8">Create your account to start collaborating</p>
               
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Username</label>
                   <input
@@ -86,12 +85,38 @@ const SignUpPage = () => {
                     name="username"
                     value={formData.username}
                     onChange={handleChange}
-                    placeholder="Username"
+                    placeholder="Choose a username"
                     className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent outline-none transition-colors"
                     required
+                    minLength="3"
                   />
                 </div>
-                
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">First Name</label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      placeholder="First name"
+                      className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent outline-none transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Last Name</label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      placeholder="Last name"
+                      className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent outline-none transition-colors"
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium mb-2">Email Address</label>
                   <input

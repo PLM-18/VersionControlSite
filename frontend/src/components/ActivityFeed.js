@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Download, User, Calendar, MessageSquare, GitCommit, Star } from 'lucide-react';
+import { activityAPI } from '../services/api.js';
 
 const ActivityFeed = ({ activeTab }) => {
+  const navigate = useNavigate();
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -12,20 +15,16 @@ const ActivityFeed = ({ activeTab }) => {
   const fetchActivities = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const type = activeTab === 'friends' ? 'local' : 'global';
-      const response = await fetch(`/api/activity?type=${type}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setActivities(data);
+      let data;
+      if (activeTab === 'local') {
+        data = await activityAPI.getLocalActivity();
+      } else {
+        data = await activityAPI.getGlobalActivity();
       }
+      setActivities(data);
     } catch (error) {
       console.error('Error fetching activities:', error);
+      setActivities([]);
     } finally {
       setLoading(false);
     }
@@ -112,7 +111,6 @@ const ActivityFeed = ({ activeTab }) => {
     <div className="space-y-6">
       {activities.map((activity) => (
         <div key={activity.id} className="bg-gray-800 rounded-lg p-6 card-hover border-l-4 border-transparent hover:border-green-500">
-          {/* Activity Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <img 
@@ -139,11 +137,9 @@ const ActivityFeed = ({ activeTab }) => {
             </div>
           </div>
 
-          {/* Activity Content */}
           <div className="mb-4">
             <p className="text-gray-300 mb-3">{activity.message || activity.description}</p>
             
-            {/* Project Card */}
             {activity.project && (
               <div className="bg-gray-700 rounded-lg p-4">
                 <div className="flex items-start justify-between">
@@ -160,7 +156,6 @@ const ActivityFeed = ({ activeTab }) => {
                       {activity.project.description}
                     </p>
                     
-                    {/* Project Tags */}
                     <div className="flex flex-wrap gap-2 mb-3">
                       {activity.project.hashtags?.map((tag, index) => (
                         <span 
@@ -195,7 +190,6 @@ const ActivityFeed = ({ activeTab }) => {
             )}
           </div>
 
-          {/* Activity Actions */}
           <div className="flex items-center space-x-4 text-sm text-gray-400">
             <button className="hover:text-green-400 transition-colors">
               <MessageSquare size={16} className="inline mr-1" />
@@ -209,7 +203,6 @@ const ActivityFeed = ({ activeTab }) => {
         </div>
       ))}
       
-      {/* Load More Button */}
       {activities.length > 0 && (
         <div className="text-center pt-6">
           <button className="bg-gray-800 hover:bg-gray-700 px-6 py-3 rounded-lg transition-colors">

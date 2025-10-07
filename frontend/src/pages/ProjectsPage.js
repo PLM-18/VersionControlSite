@@ -1,12 +1,17 @@
+// 27 - u23629810
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.js';
+import { useToast } from '../context/ToastContext.js';
 import Sidebar from '../components/Sidebar.js';
 import CreateProjectModal from '../components/CreateProjectModal.js';
-import { Plus, Filter, Search, Grid, List } from 'lucide-react';
+import { Plus, Filter, Search, Grid, List, Hash } from 'lucide-react';
+import { projectAPI } from '../services/api.js';
 
 const ProjectsPage = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
+  const toast = useToast();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,88 +25,42 @@ const ProjectsPage = () => {
   });
 
   useEffect(() => {
-    // Mock user data
-    const mockUser = {
-      id: 1,
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'johndoe@gmail.com',
-      profileImage: null
-    };
-
-    // Mock projects data
-    const mockProjects = [
-      {
-        id: 1,
-        name: 'E-commerce Platform',
-        description: 'A modern e-commerce platform built with React and Node.js featuring real-time inventory management and payment.',
-        type: 'TypeScript',
-        hashtags: [],
-        status: 'checked_in',
-        version: '1.0.0',
-        members: [1],
-        ownerId: 1,
-        updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: 2,
-        name: 'Mobile Banking App',
-        description: 'Secure mobile banking application with biometric authentication and real-time transaction monitoring.',
-        type: 'React Native',
-        hashtags: [],
-        status: 'checked_in',
-        version: '1.0.0',
-        members: [1],
-        ownerId: 1,
-        updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: 3,
-        name: 'AI Analytics Dashboard',
-        description: 'Machine learning powered analytics dashboard for business intelligence and data visualization.',
-        type: 'Python',
-        hashtags: [],
-        status: 'checked_in',
-        version: '1.0.0',
-        members: [1],
-        ownerId: 1,
-        updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-      }
-    ];
-
-    setUser(mockUser);
-    setProjects(mockProjects);
-    setLoading(false);
+    fetchProjects();
   }, []);
 
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      const data = await projectAPI.getAllProjects();
+      setProjects(data);
+    } catch (err) {
+      console.error('Error fetching projects:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCreateProject = async (projectData) => {
-    // Mock create project
-    const newProject = {
-      id: projects.length + 1,
-      name: projectData.name,
-      description: projectData.description,
-      type: projectData.type,
-      hashtags: projectData.hashtags,
-      status: 'checked_in',
-      version: projectData.version,
-      members: [user.id],
-      ownerId: user.id,
-      updatedAt: new Date().toISOString()
-    };
-    
-    setProjects(prev => [newProject, ...prev]);
-    setShowCreateModal(false);
+    try {
+      await projectAPI.createProject(projectData);
+      await fetchProjects();
+      setShowCreateModal(false);
+      toast.success('Project created successfully!');
+    } catch (err) {
+      console.error('Error creating project:', err);
+      toast.error(err.message || 'Failed to create project');
+    }
   };
 
   const filteredProjects = projects.filter(project => {
-    const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = project.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         project.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.hashtags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesType = !filters.type || project.type === filters.type;
-    const matchesStatus = !filters.status || project.status === filters.status;
-    
+
+    const matchesType = !filters.type || project.projectType === filters.type;
+    const matchesStatus = !filters.status ||
+      (filters.status === 'checked_out' ? project.checkedOutBy : !project.checkedOutBy);
+
     return matchesSearch && matchesType && matchesStatus;
   });
 
@@ -113,9 +72,25 @@ const ProjectsPage = () => {
     );
   }
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+
+    if (diffHours < 1) return 'Just now';
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+
+    const diffWeeks = Math.floor(diffDays / 7);
+    return `${diffWeeks} week${diffWeeks > 1 ? 's' : ''} ago`;
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white flex">
-      <Sidebar user={user} currentPage="create-project" />
+      <Sidebar currentPage="projects" />
       
       <div className="flex-1 flex flex-col">
         <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
@@ -240,34 +215,57 @@ const ProjectsPage = () => {
             `}>
               {filteredProjects.map(project => (
                 <div
-                  key={project.id}
-                  className={viewMode === 'grid' ? 'bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-all cursor-pointer' : ''}
-                  onClick={() => navigate(`/project/${project.id}`)}
+                  key={project._id}
+                  className={`${
+                    viewMode === 'grid'
+                      ? 'bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-all cursor-pointer'
+                      : 'bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-colors cursor-pointer'
+                  }`}
+                  onClick={() => navigate(`/project/${project._id}`)}
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-2">{project.name}</h3>
-                      <p className="text-gray-400 text-sm line-clamp-2">{project.description}</p>
+                    <div className="flex-1">
+                      {project.projectImage && viewMode === 'grid' && (
+                        <img
+                          src={project.projectImage}
+                          alt={project.title}
+                          className="w-full h-32 object-cover rounded-lg mb-3"
+                        />
+                      )}
+                      <h3 className="text-lg font-semibold text-white mb-2">{project.title}</h3>
+                      <p className="text-gray-400 text-sm line-clamp-2 mb-3">{project.description}</p>
+
+                      {project.hashtags && project.hashtags.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {project.hashtags.slice(0, 3).map((tag, index) => (
+                            <span key={index} className="flex items-center text-green-400 text-xs">
+                              <Hash size={12} className="mr-1" />
+                              {tag}
+                            </span>
+                          ))}
+                          {project.hashtags.length > 3 && (
+                            <span className="text-gray-500 text-xs">+{project.hashtags.length - 3} more</span>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    {viewMode === 'grid' && (
-                      <button className="p-2 text-gray-400 hover:text-white">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                        </svg>
-                      </button>
-                    )}
                   </div>
-                  
+
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">{project.type}</span>
+                    <div className="flex items-center space-x-3">
+                      {project.projectType && (
+                        <span className="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-xs">
+                          {project.projectType}
+                        </span>
+                      )}
+                      {project.checkedOutBy && (
+                        <span className="bg-orange-500/20 text-orange-400 px-2 py-1 rounded text-xs">
+                          Checked Out
+                        </span>
+                      )}
+                    </div>
                     <span className="text-gray-500">
-                      {(() => {
-                        const hours = Math.floor((Date.now() - new Date(project.updatedAt)) / (1000 * 60 * 60));
-                        if (hours < 24) return `${hours} hours ago`;
-                        const days = Math.floor(hours / 24);
-                        if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
-                        return `${Math.floor(days / 7)} week${Math.floor(days / 7) > 1 ? 's' : ''} ago`;
-                      })()}
+                      {formatDate(project.updatedAt)}
                     </span>
                   </div>
                 </div>

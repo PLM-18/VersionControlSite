@@ -1,162 +1,133 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.js';
+import { useToast } from '../context/ToastContext.js';
 import Sidebar from '../components/Sidebar.js';
 import SearchBar from '../components/SearchBar.js';
-import { 
-  Bell, 
-  X, 
-  Check, 
-  GitPullRequest, 
-  UserPlus, 
+import ConfirmModal from '../components/ConfirmModal.js';
+import {
+  Bell,
+  X,
+  Check,
+  UserPlus,
   AlertTriangle,
   CheckCircle,
   MessageCircle,
-  Star,
   GitBranch,
-  Code,
   Clock,
   Archive
 } from 'lucide-react';
+import { notificationAPI } from '../services/api.js';
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
+  const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
-  const [filter, setFilter] = useState('all'); 
+  const [filter, setFilter] = useState('all');
+  const [confirmAction, setConfirmAction] = useState(null);
 
-  const mockNotifications = [
-    {
-      id: 1,
-      type: 'pull_request',
-      title: 'Pull Request Merged',
-      message: 'Your pull request for feature/user-auth has been merged into main branch.',
-      project: 'E-commerce Platform',
-      timestamp: '2 hours ago',
-      read: false,
-      icon: GitPullRequest,
-      iconColor: 'text-green-400',
-      bgColor: 'bg-green-900/20'
-    },
-    {
-      id: 2,
-      type: 'collaborator',
-      title: 'New Collaborator Added',
-      message: 'Sarah Johnson (@sarahjohnson) has been added as a collaborator to Mobile Banking App.',
-      project: 'Mobile Banking App',
-      timestamp: '4 hours ago',
-      read: false,
-      icon: UserPlus,
-      iconColor: 'text-blue-400',
-      bgColor: 'bg-blue-900/20'
-    },
-    {
-      id: 3,
-      type: 'deployment',
-      title: 'Deploy Successful',
-      message: 'Your latest changes have been successfully deployed to production.',
-      project: 'AI Analytics Dashboard',
-      timestamp: '1 day ago',
-      read: true,
-      icon: CheckCircle,
-      iconColor: 'text-green-400',
-      bgColor: 'bg-green-900/20'
-    },
-    {
-      id: 4,
-      type: 'build_failed',
-      title: 'Build Failed',
-      message: 'Build #247 failed due to test failures. Please check the logs for more details.',
-      project: 'E-commerce Platform',
-      timestamp: '1 day ago',
-      read: true,
-      icon: AlertTriangle,
-      iconColor: 'text-yellow-400',
-      bgColor: 'bg-yellow-900/20'
-    },
-    {
-      id: 5,
-      type: 'comment',
-      title: 'New Comment on Your Project',
-      message: 'Alex Chen commented: "Great implementation! The authentication flow works perfectly."',
-      project: 'Social Media Dashboard',
-      timestamp: '2 days ago',
-      read: false,
-      icon: MessageCircle,
-      iconColor: 'text-purple-400',
-      bgColor: 'bg-purple-900/20'
-    },
-    {
-      id: 6,
-      type: 'starred',
-      title: 'Project Starred',
-      message: 'Your project "Weather Prediction ML Model" received 5 new stars.',
-      project: 'Weather Prediction ML Model',
-      timestamp: '3 days ago',
-      read: false,
-      icon: Star,
-      iconColor: 'text-yellow-400',
-      bgColor: 'bg-yellow-900/20'
-    },
-    {
-      id: 7,
-      type: 'branch_created',
-      title: 'New Branch Created',
-      message: 'Branch "feature/payment-integration" has been created in E-commerce Platform.',
-      project: 'E-commerce Platform',
-      timestamp: '3 days ago',
-      read: true,
-      icon: GitBranch,
-      iconColor: 'text-indigo-400',
-      bgColor: 'bg-indigo-900/20'
-    },
-    {
-      id: 8,
-      type: 'code_review',
-      title: 'Code Review Requested',
-      message: 'Maria Garcia requested your review on PR #156: "Add user profile settings"',
-      project: 'Mobile Banking App',
-      timestamp: '4 days ago',
-      read: false,
-      icon: Code,
-      iconColor: 'text-cyan-400',
-      bgColor: 'bg-cyan-900/20'
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'friend_request': return UserPlus;
+      case 'friend_accepted': return CheckCircle;
+      case 'project_update': return MessageCircle;
+      case 'checkout': return GitBranch;
+      case 'checkin': return GitBranch;
+      default: return Bell;
     }
-  ];
+  };
+
+  const getNotificationColors = (type) => {
+    switch (type) {
+      case 'friend_request': return { icon: 'text-blue-400', bg: 'bg-blue-900/20' };
+      case 'friend_accepted': return { icon: 'text-green-400', bg: 'bg-green-900/20' };
+      case 'project_update': return { icon: 'text-purple-400', bg: 'bg-purple-900/20' };
+      case 'checkout': return { icon: 'text-orange-400', bg: 'bg-orange-900/20' };
+      case 'checkin': return { icon: 'text-green-400', bg: 'bg-green-900/20' };
+      default: return { icon: 'text-gray-400', bg: 'bg-gray-900/20' };
+    }
+  };
 
   useEffect(() => {
-    const mockUser = {
-      id: 1,
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'johndoe@gmail.com',
-      profileImage: null
-    };
-
-    setUser(mockUser);
-    setNotifications(mockNotifications);
-    setLoading(false);
+    fetchNotifications();
   }, []);
 
-  const handleDismiss = (id) => {
-    setNotifications(notifications.filter(n => n.id !== id));
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const data = await notificationAPI.getNotifications();
+      setNotifications(data);
+    } catch (err) {
+      console.error('Error fetching notifications:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleMarkAsRead = (id) => {
-    setNotifications(notifications.map(n => 
-      n.id === id ? { ...n, read: true } : n
-    ));
+  const handleDismiss = async (id) => {
+    try {
+      await notificationAPI.deleteNotification(id);
+      setNotifications(notifications.filter(n => n._id !== id));
+    } catch (err) {
+      console.error('Error deleting notification:', err);
+    }
   };
 
-  const handleMarkAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  const handleMarkAsRead = async (id) => {
+    try {
+      await notificationAPI.markAsRead(id);
+      setNotifications(notifications.map(n =>
+        n._id === id ? { ...n, read: true } : n
+      ));
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationAPI.markAllAsRead();
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+    } catch (err) {
+      console.error('Error marking all as read:', err);
+    }
   };
 
   const handleClearAll = () => {
-    if (window.confirm('Are you sure you want to clear all notifications?')) {
-      setNotifications([]);
-    }
+    setConfirmAction({
+      title: 'Clear All Notifications',
+      message: 'Are you sure you want to clear all notifications? This action cannot be undone.',
+      confirmText: 'Clear All',
+      confirmColor: 'red',
+      onConfirm: async () => {
+        try {
+          await Promise.all(notifications.map(n => notificationAPI.deleteNotification(n._id)));
+          setNotifications([]);
+          toast.success('All notifications cleared');
+        } catch (err) {
+          console.error('Error clearing notifications:', err);
+          toast.error('Failed to clear notifications');
+        }
+      }
+    });
+  };
+
+  const formatTimestamp = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   const filteredNotifications = notifications.filter(n => {
@@ -177,8 +148,7 @@ const NotificationsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex">
-      {/* Sidebar */}
-      <Sidebar user={user} currentPage="notifications" />
+      <Sidebar currentPage="notifications" />
       
       <div className="flex-1 flex flex-col">
         <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
@@ -278,28 +248,31 @@ const NotificationsPage = () => {
             {filteredNotifications.length > 0 ? (
               <div className="space-y-3">
                 {filteredNotifications.map((notification) => {
-                  const IconComponent = notification.icon;
-                  
+                  const IconComponent = getNotificationIcon(notification.type);
+                  const colors = getNotificationColors(notification.type);
+
                   return (
                     <div
-                      key={notification.id}
+                      key={notification._id}
                       className={`bg-gray-800 rounded-lg p-4 transition-all hover:bg-gray-750 ${
                         !notification.read ? 'border-l-4 border-green-500' : ''
                       }`}
                     >
                       <div className="flex items-start space-x-4">
-                        {/* Icon */}
-                        <div className={`p-2 rounded-lg ${notification.bgColor}`}>
-                          <IconComponent size={20} className={notification.iconColor} />
+                        <div className={`p-2 rounded-lg ${colors.bg}`}>
+                          <IconComponent size={20} className={colors.icon} />
                         </div>
-                        
-                        {/* Content */}
+
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center space-x-2">
                                 <h3 className="font-semibold text-white">
-                                  {notification.title}
+                                  {notification.type === 'friend_request' && 'Friend Request'}
+                                  {notification.type === 'friend_accepted' && 'Friend Request Accepted'}
+                                  {notification.type === 'project_update' && 'Project Update'}
+                                  {notification.type === 'checkout' && 'Project Checked Out'}
+                                  {notification.type === 'checkin' && 'Project Checked In'}
                                 </h3>
                                 {!notification.read && (
                                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
@@ -309,21 +282,17 @@ const NotificationsPage = () => {
                                 {notification.message}
                               </p>
                               <div className="flex items-center space-x-4 mt-2">
-                                <span className="text-xs text-gray-500">
-                                  {notification.project}
-                                </span>
                                 <span className="text-xs text-gray-500 flex items-center">
                                   <Clock size={12} className="mr-1" />
-                                  {notification.timestamp}
+                                  {formatTimestamp(notification.createdAt)}
                                 </span>
                               </div>
                             </div>
-                            
-                            {/* Actions */}
+
                             <div className="flex items-center space-x-2 ml-4">
                               {!notification.read && (
                                 <button
-                                  onClick={() => handleMarkAsRead(notification.id)}
+                                  onClick={() => handleMarkAsRead(notification._id)}
                                   className="p-1 text-gray-400 hover:text-green-400 transition-colors"
                                   title="Mark as read"
                                 >
@@ -331,7 +300,7 @@ const NotificationsPage = () => {
                                 </button>
                               )}
                               <button
-                                onClick={() => handleDismiss(notification.id)}
+                                onClick={() => handleDismiss(notification._id)}
                                 className="p-1 text-gray-400 hover:text-red-400 transition-colors"
                                 title="Dismiss"
                               >
@@ -369,6 +338,19 @@ const NotificationsPage = () => {
           </div>
         </main>
       </div>
+
+      {/* Confirm Modal */}
+      {confirmAction && (
+        <ConfirmModal
+          isOpen={!!confirmAction}
+          onClose={() => setConfirmAction(null)}
+          onConfirm={confirmAction.onConfirm}
+          title={confirmAction.title}
+          message={confirmAction.message}
+          confirmText={confirmAction.confirmText}
+          confirmColor={confirmAction.confirmColor}
+        />
+      )}
     </div>
   );
 };

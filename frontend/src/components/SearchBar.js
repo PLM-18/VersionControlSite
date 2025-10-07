@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Users, FolderOpen, MessageSquare } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Users, FolderOpen, Hash } from 'lucide-react';
+import { userAPI, projectAPI } from '../services/api.js';
 
 const SearchBar = () => {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState({ users: [], projects: [] });
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const searchRef = useRef(null);
@@ -24,27 +27,26 @@ const SearchBar = () => {
 
   const performSearch = async (searchQuery) => {
     if (!searchQuery.trim()) {
-      setResults([]);
+      setResults({ users: [], projects: [] });
       setIsOpen(false);
       return;
     }
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&type=all`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const [usersData, projectsData] = await Promise.all([
+        userAPI.searchUsers(searchQuery),
+        projectAPI.searchProjects(searchQuery)
+      ]);
 
-      if (response.ok) {
-        const data = await response.json();
-        setResults(data);
-        setIsOpen(true);
-      }
+      setResults({
+        users: usersData || [],
+        projects: projectsData || []
+      });
+      setIsOpen(true);
     } catch (error) {
       console.error('Search error:', error);
+      setResults({ users: [], projects: [] });
     } finally {
       setLoading(false);
     }
@@ -65,24 +67,18 @@ const SearchBar = () => {
     }, 300);
   };
 
-  const getResultIcon = (type) => {
-    switch (type) {
-      case 'user':
-        return <Users size={16} className="text-blue-400" />;
-      case 'project':
-        return <FolderOpen size={16} className="text-green-400" />;
-      case 'activity':
-        return <MessageSquare size={16} className="text-purple-400" />;
-      default:
-        return <Search size={16} className="text-gray-400" />;
+  const handleResultClick = (type, id) => {
+    setIsOpen(false);
+    setQuery('');
+
+    if (type === 'user') {
+      navigate(`/profile/${id}`);
+    } else if (type === 'project') {
+      navigate(`/project/${id}`);
     }
   };
 
-  const handleResultClick = (result) => {
-    // Handle navigation based on result type
-    setIsOpen(false);
-    setQuery('');
-  };
+  const totalResults = results.users.length + results.projects.length;
 
   return (
     <div className="relative w-96" ref={searchRef}>
@@ -103,37 +99,93 @@ const SearchBar = () => {
         )}
       </div>
 
-      {/* Search Results Dropdown */}
       {isOpen && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
-          {results.length === 0 ? (
+          {totalResults === 0 ? (
             <div className="p-4 text-center text-gray-400">
               {query ? 'No results found' : 'Start typing to search...'}
             </div>
           ) : (
             <div className="py-2">
-              {results.map((result, index) => (
-                <button
-                  key={`${result.type}-${result.id || index}`}
-                  onClick={() => handleResultClick(result)}
-                  className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 transition-colors"
-                >
-                  {getResultIcon(result.type)}
-                  <div className="flex-1 text-left">
-                    <div className="font-medium text-white">
-                      {result.name || result.username || result.title}
-                    </div>
-                    <div className="text-sm text-gray-400">
-                      {result.type === 'user' && result.email}
-                      {result.type === 'project' && result.description}
-                      {result.type === 'activity' && result.message}
-                    </div>
+              {results.users.length > 0 && (
+                <div>
+                  <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
+                    Users ({results.users.length})
                   </div>
-                  <div className="text-xs text-gray-500 uppercase">
-                    {result.type}
+                  {results.users.map((user) => (
+                    <button
+                      key={user._id}
+                      onClick={() => handleResultClick('user', user._id)}
+                      className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 transition-colors"
+                    >
+                      <div className="flex-shrink-0">
+                        {user.profileImage ? (
+                          <img
+                            src={user.profileImage}
+                            alt={user.username}
+                            className="w-8 h-8 rounded-full"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                            <span className="text-black font-bold text-sm">
+                              {user.username[0].toUpperCase()}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 text-left min-w-0">
+                        <div className="font-medium text-white truncate">
+                          {user.firstName} {user.lastName}
+                        </div>
+                        <div className="text-sm text-gray-400 truncate">
+                          @{user.username}
+                        </div>
+                      </div>
+                      <Users size={14} className="text-blue-400 flex-shrink-0" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {results.projects.length > 0 && (
+                <div className={results.users.length > 0 ? 'mt-2 border-t border-gray-700' : ''}>
+                  <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
+                    Projects ({results.projects.length})
                   </div>
-                </button>
-              ))}
+                  {results.projects.map((project) => (
+                    <button
+                      key={project._id}
+                      onClick={() => handleResultClick('project', project._id)}
+                      className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 transition-colors"
+                    >
+                      <FolderOpen size={20} className="text-green-400 flex-shrink-0" />
+                      <div className="flex-1 text-left min-w-0">
+                        <div className="font-medium text-white truncate">
+                          {project.title}
+                        </div>
+                        <div className="text-sm text-gray-400 truncate">
+                          {project.description}
+                        </div>
+                        {project.hashtags && project.hashtags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {project.hashtags.slice(0, 3).map((tag, idx) => (
+                              <span key={idx} className="flex items-center text-green-400 text-xs">
+                                <Hash size={10} className="mr-0.5" />
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {project.projectType && (
+                        <span className="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-xs flex-shrink-0">
+                          {project.projectType}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

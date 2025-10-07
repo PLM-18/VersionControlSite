@@ -38,7 +38,6 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* Background pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
           backgroundImage: `radial-gradient(circle at 25% 25%, #4f46e5 0%, transparent 50%), 
@@ -47,7 +46,6 @@ const LandingPage = () => {
         }}></div>
       </div>
 
-      {/* Header */}
       <header className="relative z-10 flex justify-between items-center px-8 py-6">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
@@ -63,9 +61,7 @@ const LandingPage = () => {
         </button>
       </header>
 
-      {/* Main Content */}
       <div className="relative z-10 flex items-center justify-between px-8 py-16 max-w-7xl mx-auto">
-        {/* Left Side */}
         <div className="flex-1 max-w-2xl">
           <h1 className="text-6xl font-bold mb-6">
             <span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
@@ -81,7 +77,6 @@ const LandingPage = () => {
             The next generation of version control built for modern development teams.
           </p>
 
-          {/* Feature Cards */}
           <div className="grid grid-cols-2 gap-4 mb-8">
             {features.map((feature, index) => (
               <FeatureCard key={index} {...feature} />
@@ -89,7 +84,6 @@ const LandingPage = () => {
           </div>
         </div>
 
-        {/* Right Side - Sign Up Form */}
         <div className="w-96 ml-12">
           <SignUpModal onClose={() => setShowSignUpModal(false)} />
         </div>
