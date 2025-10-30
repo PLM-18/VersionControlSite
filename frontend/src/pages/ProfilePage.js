@@ -251,10 +251,12 @@ const ProfilePage = () => {
                         {profile.email}
                       </div>
                     )}
-                    <div className="flex items-center text-gray-400">
-                      <Calendar size={16} className="mr-2" />
-                      Joined {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                    </div>
+                    {profile.createdAt && (
+                      <div className="flex items-center text-gray-400">
+                        <Calendar size={16} className="mr-2" />
+                        Joined {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                      </div>
+                    )}
                   </div>
 
                   {profile.skills && profile.skills.length > 0 && (

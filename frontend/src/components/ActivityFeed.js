@@ -116,15 +116,25 @@ const ActivityFeed = ({ activeTab, userId }) => {
         <div key={activity.id} className="bg-gray-800 rounded-lg p-6 card-hover border-l-4 border-transparent hover:border-green-500">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <img 
-                src={activity.user?.profileImage || '/api/placeholder/32/32'} 
-                alt={activity.user?.firstName}
-                className="w-8 h-8 rounded-full"
-              />
+              {activity.user?.profileImage ? (
+                <img
+                  src={activity.user.profileImage}
+                  alt={activity.user?.firstName || 'User'}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full border-2 border-gray-900 bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center overflow-hidden">
+                  <span className="text-white font-bold text-sm">
+                    {activity.user?.username?.[0]?.toUpperCase()}
+                  </span>
+                </div>
+              )}
               <div>
                 <div className="flex items-center space-x-2">
                   <span className="font-medium text-green-400">
-                    {activity.user?.firstName} {activity.user?.lastName}
+                    {activity.user?.firstName && activity.user?.lastName
+                      ? `${activity.user.firstName} ${activity.user.lastName}`
+                      : activity.user?.username || 'Unknown User'}
                   </span>
                   <span className="text-gray-400">•</span>
                   <span className="text-sm text-gray-400">{activity.action || 'shared a project'}</span>

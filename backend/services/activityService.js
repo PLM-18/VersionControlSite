@@ -34,6 +34,7 @@ class ActivityService {
 
   async getUserActivity(userId, limit = 50) {
     const checkins = await CheckIn.find({ user: userId })
+      .populate('user', 'username firstName lastName profileImage')
       .populate('project', 'title projectImage projectType hashtags')
       .sort({ createdAt: -1 })
       .limit(limit);

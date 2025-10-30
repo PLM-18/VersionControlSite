@@ -124,6 +124,9 @@ export const getUserById = async (req, res) => {
       website: user.website,
       skills: user.skills,
       friends: user.friends,
+      createdAt: user.createdAt,
+      isVerified: user.isVerified,
+      isAdmin: user.isAdmin,
     });
   } catch (error) {
     res.status(404).json({ message: error.message });
