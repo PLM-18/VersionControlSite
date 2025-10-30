@@ -45,7 +45,7 @@ const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|js|py|html|css|txt|md|json|xml|zip/;
+    const allowedTypes = /jpeg|jpg|png|gif|js|py|html|css|txt|md|json|xml|zip|cpp|java|c|cs|jsx|tsx|h|ts/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype) || file.mimetype.startsWith('text/') || file.mimetype === 'application/zip';
 

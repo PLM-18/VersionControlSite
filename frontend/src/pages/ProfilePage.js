@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext.js';
 import { useToast } from '../context/ToastContext.js';
 import Sidebar from '../components/Sidebar.js';
 import ConfirmModal from '../components/ConfirmModal.js';
+import VerificationRequestModal from '../components/VerificationRequestModal.js';
+import VerifiedBadge from '../components/VerifiedBadge.js';
 import {
   Edit3,
   MapPin,
@@ -15,7 +17,9 @@ import {
   UserCheck,
   X,
   Upload,
-  Trash2
+  Trash2,
+  CheckCircle,
+  Shield
 } from 'lucide-react';
 import { userAPI, projectAPI } from '../services/api.js';
 
@@ -32,6 +36,7 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('projects');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
   const [editData, setEditData] = useState({
     firstName: '',
@@ -217,9 +222,15 @@ const ProfilePage = () => {
                 )}
 
                 <div className="flex-1 pt-4">
-                  <h1 className="text-3xl font-bold mb-1">
-                    {profile.firstName} {profile.lastName}
-                  </h1>
+                  <div className="flex items-center space-x-2 mb-1">
+                    <h1 className="text-3xl font-bold">
+                      {profile.firstName} {profile.lastName}
+                    </h1>
+                    {profile.isVerified && <VerifiedBadge size={24} />}
+                    {profile.isAdmin && (
+                      <Shield className="text-yellow-400" size={20} title="Administrator" />
+                    )}
+                  </div>
                   <p className="text-gray-400 mb-3">@{profile.username}</p>
 
                   {profile.bio && (
@@ -270,6 +281,15 @@ const ProfilePage = () => {
                       <Edit3 size={16} />
                       <span>Edit Profile</span>
                     </button>
+                    {!profile.isVerified && !profile.isAdmin && (
+                      <button
+                        onClick={() => setShowVerificationModal(true)}
+                        className="flex items-center space-x-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                      >
+                        <CheckCircle size={16} />
+                        <span>Request Verification</span>
+                      </button>
+                    )}
                     <button
                       onClick={handleDeleteProfile}
                       className="flex items-center space-x-2 px-6 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
@@ -584,6 +604,16 @@ const ProfilePage = () => {
           message={confirmAction.message}
           confirmText={confirmAction.confirmText}
           confirmColor={confirmAction.confirmColor}
+        />
+      )}
+
+      {showVerificationModal && (
+        <VerificationRequestModal
+          onClose={() => setShowVerificationModal(false)}
+          onSuccess={() => {
+            fetchProfileData();
+            setShowVerificationModal(false);
+          }}
         />
       )}
     </div>
