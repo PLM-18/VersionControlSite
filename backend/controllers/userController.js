@@ -1,9 +1,6 @@
 import userService from '../services/userService.js';
 import generateToken from '../utils/generateToken.js';
 
-// @desc    Register a new user
-// @route   POST /api/auth/register
-// @access  Public
 export const registerUser = async (req, res) => {
   try {
     const user = await userService.createUser(req.body);
@@ -22,9 +19,6 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// @desc    Authenticate user
-// @route   POST /api/auth/login
-// @access  Public
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -37,6 +31,8 @@ export const loginUser = async (req, res) => {
       firstName: user.firstName,
       lastName: user.lastName,
       profileImage: user.profileImage,
+      isAdmin: user.isAdmin,
+      isVerified: user.isVerified,
       token: generateToken(user._id),
     });
   } catch (error) {
@@ -44,9 +40,6 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// @desc    Get user profile
-// @route   GET /api/users/profile
-// @access  Private
 export const getUserProfile = async (req, res) => {
   try {
     const user = await userService.getUserById(req.user._id);
@@ -64,15 +57,16 @@ export const getUserProfile = async (req, res) => {
       skills: user.skills,
       friends: user.friends,
       projects: user.projects,
+      isAdmin: user.isAdmin,
+      isVerified: user.isVerified,
+      verificationRequestStatus: user.verificationRequestStatus,
+      createdAt: user.createdAt,
     });
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
 };
 
-// @desc    Update user profile
-// @route   PUT /api/users/profile
-// @access  Private
 export const updateUserProfile = async (req, res) => {
   try {
     const updateData = { ...req.body };
@@ -100,9 +94,6 @@ export const updateUserProfile = async (req, res) => {
   }
 };
 
-// @desc    Get user by ID
-// @route   GET /api/users/:id
-// @access  Private
 export const getUserById = async (req, res) => {
   try {
     const user = await userService.getUserById(req.params.id);
@@ -118,15 +109,15 @@ export const getUserById = async (req, res) => {
       website: user.website,
       skills: user.skills,
       friends: user.friends,
+      createdAt: user.createdAt,
+      isVerified: user.isVerified,
+      isAdmin: user.isAdmin,
     });
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
 };
 
-// @desc    Delete user
-// @route   DELETE /api/users/profile
-// @access  Private
 export const deleteUser = async (req, res) => {
   try {
     await userService.deleteUser(req.user._id);
@@ -136,9 +127,6 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-// @desc    Send friend request
-// @route   POST /api/users/friends/request
-// @access  Private
 export const sendFriendRequest = async (req, res) => {
   try {
     const { userId } = req.body;
@@ -149,9 +137,6 @@ export const sendFriendRequest = async (req, res) => {
   }
 };
 
-// @desc    Accept friend request
-// @route   PUT /api/users/friends/accept/:requestId
-// @access  Private
 export const acceptFriendRequest = async (req, res) => {
   try {
     const result = await userService.acceptFriendRequest(req.user._id, req.params.requestId);
@@ -161,9 +146,6 @@ export const acceptFriendRequest = async (req, res) => {
   }
 };
 
-// @desc    Reject friend request
-// @route   PUT /api/users/friends/reject/:requestId
-// @access  Private
 export const rejectFriendRequest = async (req, res) => {
   try {
     const result = await userService.rejectFriendRequest(req.user._id, req.params.requestId);
@@ -173,9 +155,6 @@ export const rejectFriendRequest = async (req, res) => {
   }
 };
 
-// @desc    Unfriend user
-// @route   DELETE /api/users/friends/:friendId
-// @access  Private
 export const unfriendUser = async (req, res) => {
   try {
     const result = await userService.unfriend(req.user._id, req.params.friendId);
@@ -185,9 +164,6 @@ export const unfriendUser = async (req, res) => {
   }
 };
 
-// @desc    Get user's friends
-// @route   GET /api/users/friends
-// @access  Private
 export const getUserFriends = async (req, res) => {
   try {
     const friends = await userService.getFriends(req.user._id);
@@ -197,9 +173,6 @@ export const getUserFriends = async (req, res) => {
   }
 };
 
-// @desc    Get friend requests
-// @route   GET /api/users/friends/requests
-// @access  Private
 export const getFriendRequests = async (req, res) => {
   try {
     const requests = await userService.getFriendRequests(req.user._id);
@@ -209,9 +182,6 @@ export const getFriendRequests = async (req, res) => {
   }
 };
 
-// @desc    Search users
-// @route   GET /api/users/search
-// @access  Private
 export const searchUsers = async (req, res) => {
   try {
     const { q } = req.query;

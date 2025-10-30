@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, User, Calendar, MessageSquare, GitCommit, Star } from 'lucide-react';
+import { Calendar, MessageSquare, GitCommit, Star } from 'lucide-react';
 import { activityAPI } from '../services/api.js';
 
-const ActivityFeed = ({ activeTab }) => {
+const ActivityFeed = ({ activeTab, userId }) => {
   const navigate = useNavigate();
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchActivities();
-  }, [activeTab]);
+  }, [activeTab, userId]);
 
   const fetchActivities = async () => {
     setLoading(true);
     try {
       let data;
-      if (activeTab === 'local') {
+      if (userId) {
+        // Fetch user-specific activity for profile page
+        data = await activityAPI.getUserActivity(userId);
+      } else if (activeTab === 'local') {
         data = await activityAPI.getLocalActivity();
       } else {
         data = await activityAPI.getGlobalActivity();
@@ -113,15 +116,25 @@ const ActivityFeed = ({ activeTab }) => {
         <div key={activity.id} className="bg-gray-800 rounded-lg p-6 card-hover border-l-4 border-transparent hover:border-green-500">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <img 
-                src={activity.user?.profileImage || '/api/placeholder/32/32'} 
-                alt={activity.user?.firstName}
-                className="w-8 h-8 rounded-full"
-              />
+              {activity.user?.profileImage ? (
+                <img
+                  src={activity.user.profileImage}
+                  alt={activity.user?.firstName || 'User'}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full border-2 border-gray-900 bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center overflow-hidden">
+                  <span className="text-white font-bold text-sm">
+                    {activity.user?.username?.[0]?.toUpperCase()}
+                  </span>
+                </div>
+              )}
               <div>
                 <div className="flex items-center space-x-2">
                   <span className="font-medium text-green-400">
-                    {activity.user?.firstName} {activity.user?.lastName}
+                    {activity.user?.firstName && activity.user?.lastName
+                      ? `${activity.user.firstName} ${activity.user.lastName}`
+                      : activity.user?.username || 'Unknown User'}
                   </span>
                   <span className="text-gray-400">•</span>
                   <span className="text-sm text-gray-400">{activity.action || 'shared a project'}</span>
@@ -179,26 +192,19 @@ const ActivityFeed = ({ activeTab }) => {
                     </div>
                   </div>
 
-                  <div className="flex flex-col space-y-2 ml-4">
-                    <button className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-sm transition-colors">
-                      <Download size={14} />
-                      <span>{activity.downloads || '24'}</span>
-                    </button>
-                  </div>
+                  {activity.project._id && (
+                    <div className="flex flex-col space-y-2 ml-4">
+                      <button
+                        onClick={() => navigate(`/project/${activity.project._id}`)}
+                        className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm transition-colors"
+                      >
+                        View Project
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
-          </div>
-
-          <div className="flex items-center space-x-4 text-sm text-gray-400">
-            <button className="hover:text-green-400 transition-colors">
-              <MessageSquare size={16} className="inline mr-1" />
-              Comment
-            </button>
-            <button className="hover:text-red-400 transition-colors">
-              <Star size={16} className="inline mr-1" />
-              Star
-            </button>
           </div>
         </div>
       ))}

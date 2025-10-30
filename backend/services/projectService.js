@@ -21,7 +21,6 @@ class ProjectService {
       }]
     });
 
-    // Add project to user's projects
     await User.findByIdAndUpdate(ownerId, {
       $push: { projects: project._id }
     });
@@ -76,7 +75,6 @@ class ProjectService {
       throw new Error('Project not found');
     }
 
-    // Check if user is owner
     if (project.owner.toString() !== userId.toString()) {
       throw new Error('Only project owner can update the project');
     }
@@ -96,19 +94,16 @@ class ProjectService {
       throw new Error('Project not found');
     }
 
-    // Check if user is owner
     if (project.owner.toString() !== userId.toString()) {
       throw new Error('Only project owner can delete the project');
     }
 
     await Project.findByIdAndDelete(projectId);
 
-    // Remove project from user's projects
     await User.findByIdAndUpdate(userId, {
       $pull: { projects: projectId }
     });
 
-    // Delete all checkins for this project
     await CheckIn.deleteMany({ project: projectId });
 
     return { message: 'Project deleted successfully' };
@@ -121,7 +116,6 @@ class ProjectService {
       throw new Error('Project not found');
     }
 
-    // Check if already checked out
     if (project.checkedOutBy) {
       if (project.checkedOutBy.toString() === userId.toString()) {
         throw new Error('You have already checked out this project');
@@ -129,7 +123,6 @@ class ProjectService {
       throw new Error('Project is currently checked out by another user');
     }
 
-    // Check if user is a member
     const isMember = project.members.some(
       member => member.user.toString() === userId.toString()
     );
@@ -154,14 +147,12 @@ class ProjectService {
       throw new Error('Project not found');
     }
 
-    // Check if user has checked out the project
     if (!project.checkedOutBy || project.checkedOutBy.toString() !== userId.toString()) {
       throw new Error('You must check out the project before checking it in');
     }
 
     const { message, files, changesDescription, hashtags } = checkinData;
 
-    // Create checkin record
     const checkin = await CheckIn.create({
       project: projectId,
       user: userId,
@@ -171,19 +162,16 @@ class ProjectService {
       hashtags: hashtags || []
     });
 
-    // Update project files if new files provided
     if (files && files.length > 0) {
       project.files.push(...files);
     }
 
-    // Release checkout
     project.checkedOutBy = null;
     project.checkedOutAt = null;
     project.lastActivity = new Date();
 
     await project.save();
 
-    // Notify project members
     const user = await User.findById(userId);
     const notificationPromises = project.members
       .filter(member => member.user.toString() !== userId.toString())
@@ -210,12 +198,10 @@ class ProjectService {
       throw new Error('Project not found');
     }
 
-    // Check if user is owner
     if (project.owner.toString() !== userId.toString()) {
       throw new Error('Only project owner can add members');
     }
 
-    // Check if already a member
     const isMember = project.members.some(
       member => member.user.toString() === memberUserId.toString()
     );
@@ -233,7 +219,6 @@ class ProjectService {
 
     await project.save();
 
-    // Notify the new member
     const owner = await User.findById(userId);
     await Notification.create({
       recipient: memberUserId,
@@ -253,12 +238,10 @@ class ProjectService {
       throw new Error('Project not found');
     }
 
-    // Check if user is owner
     if (project.owner.toString() !== userId.toString()) {
       throw new Error('Only project owner can remove members');
     }
 
-    // Cannot remove owner
     if (project.owner.toString() === memberUserId.toString()) {
       throw new Error('Cannot remove project owner');
     }
@@ -318,15 +301,58 @@ class ProjectService {
       throw new Error('Project not found');
     }
 
-    // Check if user is owner or admin
     const member = project.members.find(m => m.user.toString() === userId.toString());
     if (!member || (member.role !== 'owner' && member.role !== 'admin')) {
       throw new Error('Only project owner or admin can delete files');
     }
 
-    // Remove file from array
     project.files = project.files.filter(f => f._id.toString() !== fileId);
     await project.save();
+
+    return project;
+  }
+
+  async transferOwnership(projectId, currentOwnerId, newOwnerId) {
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      throw new Error('Project not found');
+    }
+
+    if (project.owner.toString() !== currentOwnerId.toString()) {
+      throw new Error('Only the current owner can transfer ownership');
+    }
+
+    const newOwnerMember = project.members.find(
+      member => member.user.toString() === newOwnerId.toString()
+    );
+
+    if (!newOwnerMember) {
+      throw new Error('New owner must be a member of the project');
+    }
+
+    const oldOwnerMember = project.members.find(
+      member => member.user.toString() === currentOwnerId.toString()
+    );
+    if (oldOwnerMember) {
+      oldOwnerMember.role = 'member';
+    }
+
+    newOwnerMember.role = 'owner';
+
+    project.owner = newOwnerId;
+    project.lastActivity = new Date();
+
+    await project.save();
+
+    const currentOwner = await User.findById(currentOwnerId);
+    await Notification.create({
+      recipient: newOwnerId,
+      sender: currentOwnerId,
+      type: 'ownership_transfer',
+      message: `${currentOwner.username} transferred ownership of ${project.title} to you`,
+      relatedProject: projectId
+    });
 
     return project;
   }

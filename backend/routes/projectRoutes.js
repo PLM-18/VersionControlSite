@@ -12,8 +12,10 @@ import {
   getProjectCheckins,
   searchProjects,
   getUserProjects,
-  deleteFile
+  deleteFile,
+  transferOwnership
 } from '../controllers/projectController.js';
+import { getDiscussions } from '../controllers/discussionController.js';
 import { protect } from '../middleware/auth.js';
 import multer from 'multer';
 import path from 'path';
@@ -25,13 +27,11 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-// Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadsDir);
@@ -45,7 +45,7 @@ const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|js|py|html|css|txt|md|json|xml|zip/;
+    const allowedTypes = /jpeg|jpg|png|gif|js|py|html|css|txt|md|json|xml|zip|cpp|java|c|cs|jsx|tsx|h|ts/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype) || file.mimetype.startsWith('text/') || file.mimetype === 'application/zip';
 
@@ -57,14 +57,12 @@ const upload = multer({
   }
 });
 
-// Public routes
 router.get('/', getAllProjects);
 router.get('/search', searchProjects);
 router.get('/user/:userId', getUserProjects);
 router.get('/:id', getProjectById);
 router.get('/:id/checkins', getProjectCheckins);
 
-// Protected routes
 router.post('/', protect, upload.fields([
   { name: 'projectImage', maxCount: 1 },
   { name: 'files', maxCount: 10 }
@@ -72,15 +70,16 @@ router.post('/', protect, upload.fields([
 router.put('/:id', protect, upload.single('projectImage'), updateProject);
 router.delete('/:id', protect, deleteProject);
 
-// Checkout/Checkin routes
 router.post('/:id/checkout', protect, checkoutProject);
 router.post('/:id/checkin', protect, upload.array('files', 10), checkinProject);
 
-// Member routes
 router.post('/:id/members', protect, addProjectMember);
 router.delete('/:id/members/:memberId', protect, removeProjectMember);
 
-// File routes
+router.post('/:id/transfer-ownership', protect, transferOwnership);
+
 router.delete('/:id/files/:fileId', protect, deleteFile);
+
+router.get('/:projectId/discussions', getDiscussions);
 
 export default router;

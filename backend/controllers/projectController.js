@@ -1,13 +1,9 @@
 import projectService from '../services/projectService.js';
 
-// @desc    Create a new project
-// @route   POST /api/projects
-// @access  Private
 export const createProject = async (req, res) => {
   try {
     const projectData = { ...req.body };
 
-    // Handle file uploads
     if (req.files) {
       if (req.files.projectImage) {
         projectData.projectImage = `/uploads/${req.files.projectImage[0].filename}`;
@@ -23,7 +19,6 @@ export const createProject = async (req, res) => {
       }
     }
 
-    // Parse hashtags if they come as string
     if (typeof projectData.hashtags === 'string') {
       projectData.hashtags = projectData.hashtags.split(',').map(tag => tag.trim()).filter(Boolean);
     }
@@ -36,9 +31,6 @@ export const createProject = async (req, res) => {
   }
 };
 
-// @desc    Get all projects
-// @route   GET /api/projects
-// @access  Public
 export const getAllProjects = async (req, res) => {
   try {
     const filters = {
@@ -56,9 +48,6 @@ export const getAllProjects = async (req, res) => {
   }
 };
 
-// @desc    Get project by ID
-// @route   GET /api/projects/:id
-// @access  Public
 export const getProjectById = async (req, res) => {
   try {
     const project = await projectService.getProjectById(req.params.id);
@@ -68,9 +57,6 @@ export const getProjectById = async (req, res) => {
   }
 };
 
-// @desc    Update project
-// @route   PUT /api/projects/:id
-// @access  Private
 export const updateProject = async (req, res) => {
   try {
     const updateData = { ...req.body };
@@ -79,7 +65,6 @@ export const updateProject = async (req, res) => {
       updateData.projectImage = `/uploads/${req.file.filename}`;
     }
 
-    // Parse hashtags if they come as string
     if (typeof updateData.hashtags === 'string') {
       updateData.hashtags = updateData.hashtags.split(',').map(tag => tag.trim()).filter(Boolean);
     }
@@ -96,9 +81,6 @@ export const updateProject = async (req, res) => {
   }
 };
 
-// @desc    Delete project
-// @route   DELETE /api/projects/:id
-// @access  Private
 export const deleteProject = async (req, res) => {
   try {
     const result = await projectService.deleteProject(req.params.id, req.user._id);
@@ -108,9 +90,6 @@ export const deleteProject = async (req, res) => {
   }
 };
 
-// @desc    Checkout project
-// @route   POST /api/projects/:id/checkout
-// @access  Private
 export const checkoutProject = async (req, res) => {
   try {
     const project = await projectService.checkoutProject(req.params.id, req.user._id);
@@ -120,14 +99,10 @@ export const checkoutProject = async (req, res) => {
   }
 };
 
-// @desc    Checkin project
-// @route   POST /api/projects/:id/checkin
-// @access  Private
 export const checkinProject = async (req, res) => {
   try {
     const checkinData = { ...req.body };
 
-    // Handle file uploads
     if (req.files) {
       checkinData.files = req.files.map(file => ({
         filename: file.filename,
@@ -137,7 +112,6 @@ export const checkinProject = async (req, res) => {
       }));
     }
 
-    // Parse hashtags if they come as string
     if (typeof checkinData.hashtags === 'string') {
       checkinData.hashtags = checkinData.hashtags.split(',').map(tag => tag.trim()).filter(Boolean);
     }
@@ -154,9 +128,6 @@ export const checkinProject = async (req, res) => {
   }
 };
 
-// @desc    Add member to project
-// @route   POST /api/projects/:id/members
-// @access  Private
 export const addProjectMember = async (req, res) => {
   try {
     const { userId } = req.body;
@@ -167,9 +138,6 @@ export const addProjectMember = async (req, res) => {
   }
 };
 
-// @desc    Remove member from project
-// @route   DELETE /api/projects/:id/members/:memberId
-// @access  Private
 export const removeProjectMember = async (req, res) => {
   try {
     const project = await projectService.removeMember(
@@ -183,9 +151,6 @@ export const removeProjectMember = async (req, res) => {
   }
 };
 
-// @desc    Get project checkins
-// @route   GET /api/projects/:id/checkins
-// @access  Public
 export const getProjectCheckins = async (req, res) => {
   try {
     const checkins = await projectService.getProjectCheckins(req.params.id);
@@ -195,9 +160,6 @@ export const getProjectCheckins = async (req, res) => {
   }
 };
 
-// @desc    Search projects
-// @route   GET /api/projects/search
-// @access  Public
 export const searchProjects = async (req, res) => {
   try {
     const { q } = req.query;
@@ -208,9 +170,6 @@ export const searchProjects = async (req, res) => {
   }
 };
 
-// @desc    Get user's projects
-// @route   GET /api/users/:userId/projects
-// @access  Private
 export const getUserProjects = async (req, res) => {
   try {
     const userId = req.params.userId || req.user._id;
@@ -221,15 +180,26 @@ export const getUserProjects = async (req, res) => {
   }
 };
 
-// @desc    Delete file from project
-// @route   DELETE /api/projects/:id/files/:fileId
-// @access  Private
 export const deleteFile = async (req, res) => {
   try {
     const project = await projectService.deleteFile(
       req.params.id,
       req.user._id,
       req.params.fileId
+    );
+    res.json(project);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const transferOwnership = async (req, res) => {
+  try {
+    const { newOwnerId } = req.body;
+    const project = await projectService.transferOwnership(
+      req.params.id,
+      req.user._id,
+      newOwnerId
     );
     res.json(project);
   } catch (error) {

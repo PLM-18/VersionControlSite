@@ -332,6 +332,16 @@ export const projectAPI = {
     if (!response.ok) throw new Error(data.message);
     return data;
   },
+
+  transferOwnership: async (projectId, newOwnerId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/projects/${projectId}/transfer-ownership`, {
+      method: 'POST',
+      body: JSON.stringify({ newOwnerId }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
 };
 
 export const activityAPI = {
@@ -407,10 +417,263 @@ export const notificationAPI = {
   },
 };
 
+export const adminAPI = {
+  // Activities
+  getAllActivities: async (page = 1, limit = 20) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/admin/activities?page=${page}&limit=${limit}`);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  updateActivity: async (activityId, updates) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/admin/activities/${activityId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  deleteActivity: async (activityId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/admin/activities/${activityId}`, {
+      method: 'DELETE',
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  // Projects
+  getAllProjectsAdmin: async (page = 1, limit = 20) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/admin/projects?page=${page}&limit=${limit}`);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  updateProjectAdmin: async (projectId, updates) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/admin/projects/${projectId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  deleteProjectAdmin: async (projectId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/admin/projects/${projectId}`, {
+      method: 'DELETE',
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  // Users
+  getAllUsers: async (page = 1, limit = 20) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/admin/users?page=${page}&limit=${limit}`);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  updateUser: async (userId, updates) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/admin/users/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  deleteUser: async (userId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/admin/users/${userId}`, {
+      method: 'DELETE',
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  // Project Types
+  getAllProjectTypes: async () => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/admin/project-types`);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  createProjectType: async (typeData) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/admin/project-types`, {
+      method: 'POST',
+      body: JSON.stringify(typeData),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  updateProjectType: async (typeId, updates) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/admin/project-types/${typeId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  deleteProjectType: async (typeId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/admin/project-types/${typeId}`, {
+      method: 'DELETE',
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  // Verification Requests
+  getVerificationRequests: async (status = 'pending') => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/admin/verification-requests?status=${status}`);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  approveVerificationRequest: async (requestId, adminResponse = '') => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/admin/verification-requests/${requestId}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({ adminResponse }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  rejectVerificationRequest: async (requestId, adminResponse = '') => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/admin/verification-requests/${requestId}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ adminResponse }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+};
+
+export const verificationAPI = {
+  checkEligibility: async () => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/users/verification-request/eligibility`);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  requestVerification: async (requestMessage = '') => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/users/verification-request`, {
+      method: 'POST',
+      body: JSON.stringify({ requestMessage }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  getVerificationStatus: async () => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/users/verification-request/status`);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+};
+
+export const discussionAPI = {
+  createDiscussion: async (discussionData) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/discussions`, {
+      method: 'POST',
+      body: JSON.stringify(discussionData),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  getProjectDiscussions: async (projectId, params = {}) => {
+    const queryParams = new URLSearchParams(params).toString();
+    const url = `${API_BASE_URL}/projects/${projectId}/discussions${queryParams ? `?${queryParams}` : ''}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  getDiscussionById: async (discussionId) => {
+    const response = await fetch(`${API_BASE_URL}/discussions/${discussionId}`);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  addComment: async (discussionId, content) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/discussions/${discussionId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  updateDiscussion: async (discussionId, updates) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/discussions/${discussionId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  deleteDiscussion: async (discussionId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/discussions/${discussionId}`, {
+      method: 'DELETE',
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  markCommentAsSolution: async (discussionId, commentId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/discussions/${discussionId}/comments/${commentId}/solution`, {
+      method: 'PUT',
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  addReaction: async (discussionId, commentId, reaction) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/discussions/${discussionId}/comments/${commentId}/reactions`, {
+      method: 'POST',
+      body: JSON.stringify({ reaction }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+};
+
 export default {
   auth: authAPI,
   user: userAPI,
   project: projectAPI,
   activity: activityAPI,
   notification: notificationAPI,
+  admin: adminAPI,
+  verification: verificationAPI,
+  discussion: discussionAPI,
 };

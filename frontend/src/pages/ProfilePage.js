@@ -4,18 +4,21 @@ import { useAuth } from '../context/AuthContext.js';
 import { useToast } from '../context/ToastContext.js';
 import Sidebar from '../components/Sidebar.js';
 import ConfirmModal from '../components/ConfirmModal.js';
+import VerificationRequestModal from '../components/VerificationRequestModal.js';
+import VerifiedBadge from '../components/VerifiedBadge.js';
+import ActivityFeed from '../components/ActivityFeed.js';
 import {
   Edit3,
   MapPin,
   Calendar,
   Mail,
-  Users,
   UserPlus,
   UserMinus,
   UserCheck,
   X,
-  Upload,
-  Trash2
+  Trash2,
+  CheckCircle,
+  Shield
 } from 'lucide-react';
 import { userAPI, projectAPI } from '../services/api.js';
 
@@ -32,6 +35,7 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('projects');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
   const [editData, setEditData] = useState({
     firstName: '',
@@ -217,9 +221,15 @@ const ProfilePage = () => {
                 )}
 
                 <div className="flex-1 pt-4">
-                  <h1 className="text-3xl font-bold mb-1">
-                    {profile.firstName} {profile.lastName}
-                  </h1>
+                  <div className="flex items-center space-x-2 mb-1">
+                    <h1 className="text-3xl font-bold">
+                      {profile.firstName} {profile.lastName}
+                    </h1>
+                    {profile.isVerified && <VerifiedBadge size={24} />}
+                    {profile.isAdmin && (
+                      <Shield className="text-yellow-400" size={20} title="Administrator" />
+                    )}
+                  </div>
                   <p className="text-gray-400 mb-3">@{profile.username}</p>
 
                   {profile.bio && (
@@ -239,10 +249,12 @@ const ProfilePage = () => {
                         {profile.email}
                       </div>
                     )}
-                    <div className="flex items-center text-gray-400">
-                      <Calendar size={16} className="mr-2" />
-                      Joined {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                    </div>
+                    {profile.createdAt && (
+                      <div className="flex items-center text-gray-400">
+                        <Calendar size={16} className="mr-2" />
+                        Joined {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                      </div>
+                    )}
                   </div>
 
                   {profile.skills && profile.skills.length > 0 && (
@@ -270,6 +282,15 @@ const ProfilePage = () => {
                       <Edit3 size={16} />
                       <span>Edit Profile</span>
                     </button>
+                    {!profile.isVerified && !profile.isAdmin && (
+                      <button
+                        onClick={() => setShowVerificationModal(true)}
+                        className="flex items-center space-x-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                      >
+                        <CheckCircle size={16} />
+                        <span>Request Verification</span>
+                      </button>
+                    )}
                     <button
                       onClick={handleDeleteProfile}
                       className="flex items-center space-x-2 px-6 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
@@ -314,6 +335,16 @@ const ProfilePage = () => {
                 }`}
               >
                 Projects ({projects.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('activity')}
+                className={`px-6 py-4 font-medium transition-colors ${
+                  activeTab === 'activity'
+                    ? 'text-green-400 border-b-2 border-green-400'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                Activity
               </button>
               {isOwnProfile && (
                 <>
@@ -375,6 +406,10 @@ const ProfilePage = () => {
                     </p>
                   )}
                 </div>
+              )}
+
+              {activeTab === 'activity' && (
+                <ActivityFeed userId={userId || currentUser._id} />
               )}
 
               {activeTab === 'friends' && (
@@ -584,6 +619,16 @@ const ProfilePage = () => {
           message={confirmAction.message}
           confirmText={confirmAction.confirmText}
           confirmColor={confirmAction.confirmColor}
+        />
+      )}
+
+      {showVerificationModal && (
+        <VerificationRequestModal
+          onClose={() => setShowVerificationModal(false)}
+          onSuccess={() => {
+            fetchProfileData();
+            setShowVerificationModal(false);
+          }}
         />
       )}
     </div>

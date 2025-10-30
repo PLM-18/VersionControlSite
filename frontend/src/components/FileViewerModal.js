@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Download, Edit, Upload } from 'lucide-react';
 
 const FileViewerModal = ({ file, onClose, onUpdate, projectId }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [fileContent, setFileContent] = useState('');
+  const [loadingContent, setLoadingContent] = useState(false);
   const [updateData, setUpdateData] = useState({
     message: '',
     changesDescription: '',
@@ -11,6 +13,26 @@ const FileViewerModal = ({ file, onClose, onUpdate, projectId }) => {
 
   const isTextFile = file.originalName.match(/\.(txt|md|js|jsx|ts|tsx|html|css|json|xml|py|java|c|cpp|h|sql)$/i);
   const isImageFile = file.originalName.match(/\.(jpg|jpeg|png|gif|svg|webp)$/i);
+
+  useEffect(() => {
+    if (isTextFile && !isEditing) {
+      fetchFileContent();
+    }
+  }, [file.path, isTextFile, isEditing]);
+
+  const fetchFileContent = async () => {
+    setLoadingContent(true);
+    try {
+      const response = await fetch(file.path);
+      const text = await response.text();
+      setFileContent(text);
+    } catch (err) {
+      console.error('Error loading file:', err);
+      setFileContent('Error loading file content');
+    } finally {
+      setLoadingContent(false);
+    }
+  };
 
   const handleFileChange = (e) => {
     setUpdateData({ ...updateData, updatedFile: e.target.files[0] });
@@ -27,6 +49,22 @@ const FileViewerModal = ({ file, onClose, onUpdate, projectId }) => {
     });
   };
 
+  const handleDownload = () => {
+    fetch(file.path)
+      .then(response => response.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.originalName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      })
+      .catch(err => console.error('Error downloading file:', err));
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9997] p-4">
       <div className="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
@@ -39,7 +77,7 @@ const FileViewerModal = ({ file, onClose, onUpdate, projectId }) => {
           </div>
           <div className="flex items-center space-x-2">
             <button
-              onClick={() => window.open(file.path, '_blank')}
+              onClick={handleDownload}
               className="p-2 text-green-400 hover:bg-green-500/20 rounded-lg transition-colors"
               title="Download"
             >
@@ -71,16 +109,18 @@ const FileViewerModal = ({ file, onClose, onUpdate, projectId }) => {
                   className="max-w-full h-auto rounded-lg"
                 />
               ) : isTextFile ? (
-                <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-300">
-                  <p className="text-gray-400 text-center py-8">
-                    Preview not available. Click download to view the file.
-                  </p>
+                <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-auto max-h-[60vh]">
+                  {loadingContent ? (
+                    <p className="text-gray-400 text-center py-8">Loading file content...</p>
+                  ) : (
+                    <pre className="whitespace-pre-wrap break-words">{fileContent}</pre>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-12">
                   <p className="text-gray-400 mb-4">Preview not available for this file type</p>
                   <button
-                    onClick={() => window.open(file.path, '_blank')}
+                    onClick={handleDownload}
                     className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg transition-colors inline-flex items-center space-x-2"
                   >
                     <Download size={20} />

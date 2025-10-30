@@ -12,6 +12,7 @@ import ProjectsPage from './pages/ProjectsPage.js';
 import ProfilePage from './pages/ProfilePage.js';
 import ProjectDetailPage from './pages/ProjectDetailsPage.js';
 import NotificationsPage from './pages/NotificationsPage.js';
+import AdminDashboard from './pages/AdminDashboard.js';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -79,6 +80,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <NotificationsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
           </ProtectedRoute>
         }
       />

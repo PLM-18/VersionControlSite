@@ -10,7 +10,6 @@ import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// All notification routes are protected
 router.get('/', protect, getNotifications);
 router.get('/unread-count', protect, getUnreadCount);
 router.put('/read-all', protect, markAllAsRead);
