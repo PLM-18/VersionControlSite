@@ -6,6 +6,7 @@ import Sidebar from '../components/Sidebar.js';
 import ConfirmModal from '../components/ConfirmModal.js';
 import VerificationRequestModal from '../components/VerificationRequestModal.js';
 import VerifiedBadge from '../components/VerifiedBadge.js';
+import ActivityFeed from '../components/ActivityFeed.js';
 import {
   Edit3,
   MapPin,
@@ -335,6 +336,16 @@ const ProfilePage = () => {
               >
                 Projects ({projects.length})
               </button>
+              <button
+                onClick={() => setActiveTab('activity')}
+                className={`px-6 py-4 font-medium transition-colors ${
+                  activeTab === 'activity'
+                    ? 'text-green-400 border-b-2 border-green-400'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                Activity
+              </button>
               {isOwnProfile && (
                 <>
                   <button
@@ -395,6 +406,10 @@ const ProfilePage = () => {
                     </p>
                   )}
                 </div>
+              )}
+
+              {activeTab === 'activity' && (
+                <ActivityFeed userId={userId || currentUser._id} />
               )}
 
               {activeTab === 'friends' && (
