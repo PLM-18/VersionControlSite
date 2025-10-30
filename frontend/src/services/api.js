@@ -581,6 +581,82 @@ export const verificationAPI = {
   },
 };
 
+export const discussionAPI = {
+  createDiscussion: async (discussionData) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/discussions`, {
+      method: 'POST',
+      body: JSON.stringify(discussionData),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  getProjectDiscussions: async (projectId, params = {}) => {
+    const queryParams = new URLSearchParams(params).toString();
+    const url = `${API_BASE_URL}/projects/${projectId}/discussions${queryParams ? `?${queryParams}` : ''}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  getDiscussionById: async (discussionId) => {
+    const response = await fetch(`${API_BASE_URL}/discussions/${discussionId}`);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  addComment: async (discussionId, content) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/discussions/${discussionId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  updateDiscussion: async (discussionId, updates) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/discussions/${discussionId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  deleteDiscussion: async (discussionId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/discussions/${discussionId}`, {
+      method: 'DELETE',
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  markCommentAsSolution: async (discussionId, commentId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/discussions/${discussionId}/comments/${commentId}/solution`, {
+      method: 'PUT',
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+
+  addReaction: async (discussionId, commentId, reaction) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/discussions/${discussionId}/comments/${commentId}/reactions`, {
+      method: 'POST',
+      body: JSON.stringify({ reaction }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
+};
+
 export default {
   auth: authAPI,
   user: userAPI,
@@ -589,4 +665,5 @@ export default {
   notification: notificationAPI,
   admin: adminAPI,
   verification: verificationAPI,
+  discussion: discussionAPI,
 };

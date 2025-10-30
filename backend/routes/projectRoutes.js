@@ -14,6 +14,7 @@ import {
   getUserProjects,
   deleteFile
 } from '../controllers/projectController.js';
+import { getDiscussions } from '../controllers/discussionController.js';
 import { protect } from '../middleware/auth.js';
 import multer from 'multer';
 import path from 'path';
@@ -82,5 +83,8 @@ router.delete('/:id/members/:memberId', protect, removeProjectMember);
 
 // File routes
 router.delete('/:id/files/:fileId', protect, deleteFile);
+
+// Discussion routes (nested under project)
+router.get('/:projectId/discussions', getDiscussions);
 
 export default router;

@@ -22,9 +22,14 @@ import {
   X,
   Edit,
   Trash2,
-  Settings
+  Settings,
+  MessageSquare,
+  Send,
+  ThumbsUp,
+  CheckCircle,
+  Pin
 } from 'lucide-react';
-import { projectAPI } from '../services/api.js';
+import { projectAPI, discussionAPI } from '../services/api.js';
 
 const ProjectDetailPage = () => {
   const { id } = useParams();
@@ -34,6 +39,8 @@ const ProjectDetailPage = () => {
 
   const [project, setProject] = useState(null);
   const [checkins, setCheckins] = useState([]);
+  const [discussions, setDiscussions] = useState([]);
+  const [selectedDiscussion, setSelectedDiscussion] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [showCheckinModal, setShowCheckinModal] = useState(false);
@@ -42,19 +49,29 @@ const ProjectDetailPage = () => {
   const [showFileViewer, setShowFileViewer] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null);
+  const [showCreateDiscussion, setShowCreateDiscussion] = useState(false);
   const [checkinData, setCheckinData] = useState({
     message: '',
     changesDescription: '',
     files: [],
     hashtags: ''
   });
+  const [discussionData, setDiscussionData] = useState({
+    title: '',
+    content: '',
+    tags: ''
+  });
+  const [commentText, setCommentText] = useState('');
 
   useEffect(() => {
     if (id) {
       fetchProjectDetails();
       fetchProjectCheckins();
+      if (activeTab === 'discussions') {
+        fetchDiscussions();
+      }
     }
-  }, [id]);
+  }, [id, activeTab]);
 
   const fetchProjectDetails = async () => {
     try {
@@ -73,6 +90,15 @@ const ProjectDetailPage = () => {
       setCheckins(data);
     } catch (err) {
       console.error('Error fetching checkins:', err);
+    }
+  };
+
+  const fetchDiscussions = async () => {
+    try {
+      const data = await discussionAPI.getProjectDiscussions(id);
+      setDiscussions(data.discussions || []);
+    } catch (err) {
+      console.error('Error fetching discussions:', err);
     }
   };
 
@@ -112,7 +138,22 @@ const ProjectDetailPage = () => {
   };
 
   const handleDownloadFile = (file) => {
-    window.open(file.path, '_blank');
+    fetch(file.path)
+      .then(response => response.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.originalName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      })
+      .catch(err => {
+        console.error('Error downloading file:', err);
+        toast.error('Failed to download file');
+      });
   };
 
   const handleAddMember = async (userId) => {
@@ -206,6 +247,56 @@ const ProjectDetailPage = () => {
     } catch (err) {
       toast.error(err.message || 'Failed to update file');
     }
+  };
+
+  const handleCreateDiscussion = async (e) => {
+    e.preventDefault();
+    try {
+      await discussionAPI.createDiscussion({
+        projectId: id,
+        title: discussionData.title,
+        content: discussionData.content,
+        tags: discussionData.tags.split(',').map(tag => tag.trim()).filter(Boolean)
+      });
+      setShowCreateDiscussion(false);
+      setDiscussionData({ title: '', content: '', tags: '' });
+      await fetchDiscussions();
+      toast.success('Discussion created successfully!');
+    } catch (err) {
+      toast.error(err.message || 'Failed to create discussion');
+    }
+  };
+
+  const handleAddComment = async (discussionId) => {
+    if (!commentText.trim()) return;
+    try {
+      await discussionAPI.addComment(discussionId, commentText);
+      setCommentText('');
+      const updatedDiscussion = await discussionAPI.getDiscussionById(discussionId);
+      setSelectedDiscussion(updatedDiscussion);
+      toast.success('Comment added successfully!');
+    } catch (err) {
+      toast.error(err.message || 'Failed to add comment');
+    }
+  };
+
+  const handleDeleteDiscussion = (discussionId) => {
+    setConfirmAction({
+      title: 'Delete Discussion',
+      message: 'Are you sure you want to delete this discussion? This action cannot be undone.',
+      confirmText: 'Delete',
+      confirmColor: 'red',
+      onConfirm: async () => {
+        try {
+          await discussionAPI.deleteDiscussion(discussionId);
+          setSelectedDiscussion(null);
+          await fetchDiscussions();
+          toast.success('Discussion deleted successfully!');
+        } catch (err) {
+          toast.error(err.message || 'Failed to delete discussion');
+        }
+      }
+    });
   };
 
   const formatDate = (dateString) => {
@@ -372,6 +463,17 @@ const ProjectDetailPage = () => {
                 Files ({project.files?.length || 0})
               </button>
               <button
+                onClick={() => setActiveTab('discussions')}
+                className={`py-4 border-b-2 transition-colors flex items-center space-x-2 ${
+                  activeTab === 'discussions'
+                    ? 'border-green-500 text-white'
+                    : 'border-transparent text-gray-400 hover:text-white'
+                }`}
+              >
+                <MessageSquare size={18} />
+                <span>Discussions ({discussions.length})</span>
+              </button>
+              <button
                 onClick={() => setActiveTab('activity')}
                 className={`py-4 border-b-2 transition-colors ${
                   activeTab === 'activity'
@@ -488,6 +590,163 @@ const ProjectDetailPage = () => {
                 </div>
               ) : (
                 <p className="text-gray-400 text-center py-8">No files uploaded yet</p>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'discussions' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold">Discussions</h2>
+                <button
+                  onClick={() => setShowCreateDiscussion(true)}
+                  className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                >
+                  <MessageSquare size={18} />
+                  <span>New Discussion</span>
+                </button>
+              </div>
+
+              {!selectedDiscussion ? (
+                <div className="space-y-3">
+                  {discussions.length > 0 ? (
+                    discussions.map((discussion) => (
+                      <div
+                        key={discussion._id}
+                        onClick={() => setSelectedDiscussion(discussion)}
+                        className="bg-gray-800 rounded-lg p-6 cursor-pointer hover:bg-gray-750 transition-colors"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-2">
+                              {discussion.isPinned && (
+                                <Pin size={16} className="text-yellow-400" />
+                              )}
+                              {discussion.isResolved && (
+                                <CheckCircle size={16} className="text-green-400" />
+                              )}
+                              <h3 className="text-lg font-semibold text-white">{discussion.title}</h3>
+                            </div>
+                            <p className="text-gray-400 text-sm mb-3 line-clamp-2">{discussion.content}</p>
+                            <div className="flex items-center space-x-4 text-xs text-gray-500">
+                              <span>{discussion.author?.username || 'Unknown'}</span>
+                              <span>{formatDate(discussion.createdAt)}</span>
+                              <span>{discussion.commentCount || discussion.comments?.length || 0} comments</span>
+                              {discussion.views > 0 && <span>{discussion.views} views</span>}
+                            </div>
+                            {discussion.tags && discussion.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mt-3">
+                                {discussion.tags.map((tag, index) => (
+                                  <span key={index} className="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-xs">
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-400 text-center py-8">No discussions yet. Start one!</p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <button
+                    onClick={() => setSelectedDiscussion(null)}
+                    className="flex items-center text-gray-400 hover:text-white mb-4 transition-colors"
+                  >
+                    <ArrowLeft size={20} className="mr-2" />
+                    Back to discussions
+                  </button>
+
+                  <div className="bg-gray-800 rounded-lg p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-2">
+                          {selectedDiscussion.isPinned && (
+                            <Pin size={18} className="text-yellow-400" />
+                          )}
+                          {selectedDiscussion.isResolved && (
+                            <CheckCircle size={18} className="text-green-400" />
+                          )}
+                          <h2 className="text-2xl font-bold">{selectedDiscussion.title}</h2>
+                        </div>
+                        <p className="text-gray-300 mb-4">{selectedDiscussion.content}</p>
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <span>{selectedDiscussion.author?.username || 'Unknown'}</span>
+                          <span>{formatDate(selectedDiscussion.createdAt)}</span>
+                        </div>
+                      </div>
+                      {(selectedDiscussion.author?._id === user?._id || isOwner) && (
+                        <button
+                          onClick={() => handleDeleteDiscussion(selectedDiscussion._id)}
+                          className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 size={20} />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="border-t border-gray-700 pt-6 mt-6">
+                      <h3 className="text-lg font-semibold mb-4">
+                        Comments ({selectedDiscussion.comments?.length || 0})
+                      </h3>
+
+                      <div className="space-y-4 mb-6">
+                        {selectedDiscussion.comments && selectedDiscussion.comments.length > 0 ? (
+                          selectedDiscussion.comments.map((comment) => (
+                            <div
+                              key={comment._id}
+                              className={`p-4 rounded-lg ${
+                                comment.isSolution ? 'bg-green-500/10 border border-green-500/30' : 'bg-gray-700'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-medium text-white">
+                                    {comment.author?.username || 'Unknown'}
+                                  </span>
+                                  {comment.isSolution && (
+                                    <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs flex items-center space-x-1">
+                                      <CheckCircle size={12} />
+                                      <span>Solution</span>
+                                    </span>
+                                  )}
+                                  <span className="text-xs text-gray-500">{formatDate(comment.createdAt)}</span>
+                                </div>
+                              </div>
+                              <p className="text-gray-300">{comment.content}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-500 text-center py-4">No comments yet</p>
+                        )}
+                      </div>
+
+                      {!selectedDiscussion.isLocked && (
+                        <div className="flex items-start space-x-3">
+                          <textarea
+                            value={commentText}
+                            onChange={(e) => setCommentText(e.target.value)}
+                            placeholder="Add a comment..."
+                            rows="3"
+                            className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-green-500 focus:ring-1 focus:ring-green-500 resize-none"
+                          />
+                          <button
+                            onClick={() => handleAddComment(selectedDiscussion._id)}
+                            className="bg-green-600 hover:bg-green-700 px-4 py-3 rounded-lg transition-colors"
+                            disabled={!commentText.trim()}
+                          >
+                            <Send size={20} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           )}
@@ -633,6 +892,66 @@ const ProjectDetailPage = () => {
           onClose={() => setShowEditModal(false)}
           onUpdate={handleUpdateProject}
         />
+      )}
+
+      {showCreateDiscussion && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold mb-6">New Discussion</h2>
+            <form onSubmit={handleCreateDiscussion} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Title *</label>
+                <input
+                  type="text"
+                  value={discussionData.title}
+                  onChange={(e) => setDiscussionData({ ...discussionData, title: e.target.value })}
+                  placeholder="What would you like to discuss?"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent outline-none"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Description *</label>
+                <textarea
+                  value={discussionData.content}
+                  onChange={(e) => setDiscussionData({ ...discussionData, content: e.target.value })}
+                  placeholder="Provide more details about your discussion..."
+                  rows="6"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent outline-none resize-none"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Tags</label>
+                <input
+                  type="text"
+                  value={discussionData.tags}
+                  onChange={(e) => setDiscussionData({ ...discussionData, tags: e.target.value })}
+                  placeholder="question, bug, feature (comma separated)"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent outline-none"
+                />
+              </div>
+
+              <div className="flex space-x-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateDiscussion(false)}
+                  className="flex-1 px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                >
+                  Create Discussion
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {showFileViewer && selectedFile && (

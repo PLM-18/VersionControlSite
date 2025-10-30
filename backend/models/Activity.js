@@ -20,7 +20,10 @@ const activitySchema = new mongoose.Schema({
       'issue',
       'comment',
       'follow',
-      'join_project'
+      'join_project',
+      'discussion_created',
+      'discussion_comment',
+      'discussion_solved'
     ]
   },
   project: {
@@ -69,7 +72,10 @@ activitySchema.virtual('message').get(function() {
     issue: `${user} opened an issue in ${project}`,
     comment: `${user} commented on ${project}`,
     follow: `${user} started following ${targetUser}`,
-    join_project: `${user} joined project ${project}`
+    join_project: `${user} joined project ${project}`,
+    discussion_created: `${user} started a discussion in ${project}`,
+    discussion_comment: `${user} commented on a discussion in ${project}`,
+    discussion_solved: `${user} marked a solution in ${project}`
   };
   
   return messages[this.type] || 'New activity';

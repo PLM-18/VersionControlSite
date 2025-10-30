@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler';
 import Discussion from '../models/Discussion.js';
 import Project from '../models/Project.js';
 import Activity from '../models/Activity.js';
+import User from '../models/User.js';
 
 // @desc    Create a new discussion
 // @route   POST /api/discussions
@@ -16,12 +17,13 @@ export const createDiscussion = asyncHandler(async (req, res) => {
     throw new Error('Project not found');
   }
 
-  // Check if user is a member of the project
+  // Check if user is a member of the project or the owner
   const isMember = project.members.some(
     member => member.user.toString() === req.user._id.toString()
   );
+  const isOwner = project.owner.toString() === req.user._id.toString();
 
-  if (project.owner.toString() !== req.user._id.toString() && !isMember) {
+  if (!isOwner && !isMember) {
     res.status(403);
     throw new Error('Not authorized to create discussions in this project');
   }
@@ -308,8 +310,8 @@ export const deleteDiscussion = asyncHandler(async (req, res) => {
     throw new Error('Not authorized to delete this discussion');
   }
 
-  await discussion.remove();
-  
+  await Discussion.findByIdAndDelete(discussion._id);
+
   // Update project's last activity
   project.lastActivity = Date.now();
   await project.save();
