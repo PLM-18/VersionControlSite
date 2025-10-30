@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Upload, Plus, Trash2 } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 
 const EditProjectModal = ({ project, onClose, onUpdate }) => {
   const [formData, setFormData] = useState({

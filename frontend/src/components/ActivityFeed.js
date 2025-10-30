@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, User, Calendar, MessageSquare, GitCommit, Star } from 'lucide-react';
+import { Calendar, MessageSquare, GitCommit, Star } from 'lucide-react';
 import { activityAPI } from '../services/api.js';
 
 const ActivityFeed = ({ activeTab, userId }) => {

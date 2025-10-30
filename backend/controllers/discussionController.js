@@ -4,9 +4,6 @@ import Project from '../models/Project.js';
 import Activity from '../models/Activity.js';
 import User from '../models/User.js';
 
-// @desc    Create a new discussion
-// @route   POST /api/discussions
-// @access  Private
 export const createDiscussion = asyncHandler(async (req, res) => {
   const { projectId, title, content, tags } = req.body;
 
@@ -17,7 +14,6 @@ export const createDiscussion = asyncHandler(async (req, res) => {
     throw new Error('Project not found');
   }
 
-  // Check if user is a member of the project or the owner
   const isMember = project.members.some(
     member => member.user.toString() === req.user._id.toString()
   );
@@ -38,11 +34,9 @@ export const createDiscussion = asyncHandler(async (req, res) => {
 
   const createdDiscussion = await discussion.save();
   
-  // Update project's last activity
   project.lastActivity = Date.now();
   await project.save();
 
-  // Create activity
   await Activity.create({
     user: req.user._id,
     project: project._id,
@@ -54,15 +48,11 @@ export const createDiscussion = asyncHandler(async (req, res) => {
     isGlobal: true
   });
 
-  // Populate author details
   await createdDiscussion.populate('author', 'username profileImage');
 
   res.status(201).json(createdDiscussion);
 });
 
-// @desc    Get discussions for a project
-// @route   GET /api/projects/:projectId/discussions
-// @access  Public
 export const getDiscussions = asyncHandler(async (req, res) => {
   const { projectId } = req.params;
   const { page = 1, limit = 10, sort = '-createdAt', tag } = req.query;
@@ -75,7 +65,6 @@ export const getDiscussions = asyncHandler(async (req, res) => {
     throw new Error('Project not found');
   }
 
-  // Check if project is private and user is not a member
   if (!project.isPublic) {
     const isMember = project.members.some(
       member => member.user.toString() === req.user?._id?.toString()
@@ -103,7 +92,6 @@ export const getDiscussions = asyncHandler(async (req, res) => {
 
   const total = await Discussion.countDocuments(query);
 
-  // Increment view count for each discussion
   await Discussion.updateMany(
     { _id: { $in: discussions.map(d => d._id) } },
     { $inc: { views: 1 } }
@@ -117,9 +105,6 @@ export const getDiscussions = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Get discussion by ID
-// @route   GET /api/discussions/:id
-// @access  Public
 export const getDiscussionById = asyncHandler(async (req, res) => {
   const discussion = await Discussion.findById(req.params.id)
     .populate('author', 'username profileImage')
@@ -131,7 +116,6 @@ export const getDiscussionById = asyncHandler(async (req, res) => {
     throw new Error('Discussion not found');
   }
 
-  // Check if project is private and user is not a member
   const project = await Project.findById(discussion.project._id);
   
   if (!project.isPublic) {
@@ -145,16 +129,12 @@ export const getDiscussionById = asyncHandler(async (req, res) => {
     }
   }
 
-  // Increment view count
   discussion.views += 1;
   await discussion.save();
 
   res.json(discussion);
 });
 
-// @desc    Add comment to discussion
-// @route   POST /api/discussions/:id/comments
-// @access  Private
 export const addComment = asyncHandler(async (req, res) => {
   const { content } = req.body;
   
@@ -166,7 +146,6 @@ export const addComment = asyncHandler(async (req, res) => {
     throw new Error('Discussion not found');
   }
 
-  // Check if project is private and user is not a member
   const project = await Project.findById(discussion.project._id);
   const isMember = project.members.some(
     member => member.user.toString() === req.user._id.toString()
@@ -177,7 +156,6 @@ export const addComment = asyncHandler(async (req, res) => {
     throw new Error('Not authorized to comment on this discussion');
   }
 
-  // Extract mentions
   const mentionRegex = /@([\w-]+)/g;
   const mentions = [];
   let match;
@@ -202,11 +180,9 @@ export const addComment = asyncHandler(async (req, res) => {
   
   const updatedDiscussion = await discussion.save();
   
-  // Update project's last activity
   project.lastActivity = Date.now();
   await project.save();
 
-  // Create activity
   await Activity.create({
     user: req.user._id,
     project: project._id,
@@ -222,16 +198,12 @@ export const addComment = asyncHandler(async (req, res) => {
       : null
   });
 
-  // Populate the new comment's author
   await updatedDiscussion.populate('comments.author', 'username profileImage');
   const newComment = updatedDiscussion.comments[updatedDiscussion.comments.length - 1];
 
   res.status(201).json(newComment);
 });
 
-// @desc    Update a discussion
-// @route   PUT /api/discussions/:id
-// @access  Private
 export const updateDiscussion = asyncHandler(async (req, res) => {
   const { title, content, tags, isPinned, isLocked } = req.body;
   
@@ -242,7 +214,6 @@ export const updateDiscussion = asyncHandler(async (req, res) => {
     throw new Error('Discussion not found');
   }
 
-  // Check if user is the author or an admin
   const project = await Project.findById(discussion.project);
   const isAdmin = project.members.some(
     member => 
@@ -257,7 +228,6 @@ export const updateDiscussion = asyncHandler(async (req, res) => {
     throw new Error('Not authorized to update this discussion');
   }
 
-  // Only allow pin/unpin and lock/unlock for admins/owners
   if (isPinned !== undefined || isLocked !== undefined) {
     if (project.owner.toString() !== req.user._id.toString() && !isAdmin) {
       res.status(403);
@@ -277,16 +247,12 @@ export const updateDiscussion = asyncHandler(async (req, res) => {
   
   const updatedDiscussion = await discussion.save();
   
-  // Update project's last activity
   project.lastActivity = Date.now();
   await project.save();
 
   res.json(updatedDiscussion);
 });
 
-// @desc    Delete a discussion
-// @route   DELETE /api/discussions/:id
-// @access  Private
 export const deleteDiscussion = asyncHandler(async (req, res) => {
   const discussion = await Discussion.findById(req.params.id);
 
@@ -295,7 +261,6 @@ export const deleteDiscussion = asyncHandler(async (req, res) => {
     throw new Error('Discussion not found');
   }
 
-  // Check if user is the author or an admin
   const project = await Project.findById(discussion.project);
   const isAdmin = project.members.some(
     member => 
@@ -312,16 +277,12 @@ export const deleteDiscussion = asyncHandler(async (req, res) => {
 
   await Discussion.findByIdAndDelete(discussion._id);
 
-  // Update project's last activity
   project.lastActivity = Date.now();
   await project.save();
 
   res.json({ message: 'Discussion removed' });
 });
 
-// @desc    Mark comment as solution
-// @route   PUT /api/discussions/:id/comments/:commentId/solution
-// @access  Private
 export const markCommentAsSolution = asyncHandler(async (req, res) => {
   const { commentId } = req.params;
   
@@ -332,39 +293,32 @@ export const markCommentAsSolution = asyncHandler(async (req, res) => {
     throw new Error('Discussion not found');
   }
 
-  // Check if user is the discussion author
   if (discussion.author.toString() !== req.user._id.toString()) {
     res.status(403);
     throw new Error('Only the discussion author can mark a solution');
   }
 
-  // Find the comment
   const comment = discussion.comments.id(commentId);
   if (!comment) {
     res.status(404);
     throw new Error('Comment not found');
   }
 
-  // Unmark any existing solution
   discussion.comments.forEach(c => {
     c.isSolution = false;
   });
 
-  // Mark the selected comment as solution
   comment.isSolution = true;
   
-  // Mark discussion as resolved
   discussion.isResolved = true;
   discussion.updatedAt = new Date();
   
   await discussion.save();
   
-  // Update project's last activity
   const project = await Project.findById(discussion.project);
   project.lastActivity = Date.now();
   await project.save();
 
-  // Create activity
   await Activity.create({
     user: req.user._id,
     project: project._id,
@@ -381,9 +335,6 @@ export const markCommentAsSolution = asyncHandler(async (req, res) => {
   res.json({ message: 'Comment marked as solution' });
 });
 
-// @desc    Add reaction to comment
-// @route   POST /api/discussions/:id/comments/:commentId/reactions
-// @access  Private
 export const addReaction = asyncHandler(async (req, res) => {
   const { reaction } = req.body;
   const { commentId } = req.params;
@@ -402,7 +353,6 @@ export const addReaction = asyncHandler(async (req, res) => {
     throw new Error('Discussion not found');
   }
 
-  // Check if user has access to the project
   const project = await Project.findById(discussion.project);
   const isMember = project.members.some(
     member => member.user.toString() === req.user._id.toString()
@@ -420,16 +370,13 @@ export const addReaction = asyncHandler(async (req, res) => {
     throw new Error('Comment not found');
   }
 
-  // Check if user already reacted with this reaction
   const existingReactionIndex = comment.reactions.findIndex(
     r => r.user.toString() === req.user._id.toString() && r.type === reaction
   );
 
   if (existingReactionIndex !== -1) {
-    // Remove the reaction if it already exists
     comment.reactions.splice(existingReactionIndex, 1);
   } else {
-    // Add new reaction
     comment.reactions.push({
       user: req.user._id,
       type: reaction
@@ -438,7 +385,6 @@ export const addReaction = asyncHandler(async (req, res) => {
 
   await discussion.save();
   
-  // Update project's last activity
   project.lastActivity = Date.now();
   await project.save();
 

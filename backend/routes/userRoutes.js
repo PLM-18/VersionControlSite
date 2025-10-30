@@ -29,13 +29,11 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-// Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Configure multer for profile image uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadsDir);
@@ -61,16 +59,13 @@ const upload = multer({
   }
 });
 
-// Auth routes
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 
-// User profile routes (protected)
 router.get('/profile', protect, getUserProfile);
 router.put('/profile', protect, upload.single('profileImage'), updateUserProfile);
 router.delete('/profile', protect, deleteUser);
 
-// Friend routes (protected)
 router.post('/friends/request', protect, sendFriendRequest);
 router.put('/friends/accept/:requestId', protect, acceptFriendRequest);
 router.put('/friends/reject/:requestId', protect, rejectFriendRequest);
@@ -78,16 +73,13 @@ router.delete('/friends/:friendId', protect, unfriendUser);
 router.get('/friends', protect, getUserFriends);
 router.get('/friends/requests', protect, getFriendRequests);
 
-// Search and public user routes
 router.get('/search', protect, searchUsers);
 router.get('/:id', protect, getUserById);
 
-// Verification request routes
 router.post('/verification-request', protect, async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate('projects');
 
-    // Check if user meets requirements
     const accountAge = Date.now() - new Date(user.createdAt).getTime();
     const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
 
@@ -103,7 +95,6 @@ router.post('/verification-request', protect, async (req, res) => {
       });
     }
 
-    // Check if user has checked out at least one project
     const checkOuts = await CheckIn.countDocuments({ user: user._id });
     if (checkOuts === 0) {
       return res.status(400).json({
@@ -111,12 +102,10 @@ router.post('/verification-request', protect, async (req, res) => {
       });
     }
 
-    // Check if already verified
     if (user.isVerified) {
       return res.status(400).json({ message: 'Your account is already verified' });
     }
 
-    // Check if request already exists
     const existingRequest = await VerificationRequest.findOne({ user: user._id });
     if (existingRequest) {
       if (existingRequest.status === 'pending') {
@@ -124,7 +113,6 @@ router.post('/verification-request', protect, async (req, res) => {
           message: 'You already have a pending verification request'
         });
       } else if (existingRequest.status === 'rejected') {
-        // Allow resubmission after rejection
         existingRequest.status = 'pending';
         existingRequest.requestMessage = req.body.requestMessage || '';
         existingRequest.adminResponse = '';
@@ -143,7 +131,6 @@ router.post('/verification-request', protect, async (req, res) => {
       }
     }
 
-    // Create new verification request
     const verificationRequest = await VerificationRequest.create({
       user: user._id,
       requestMessage: req.body.requestMessage || ''
@@ -163,7 +150,6 @@ router.post('/verification-request', protect, async (req, res) => {
   }
 });
 
-// Get user's verification request status
 router.get('/verification-request/status', protect, async (req, res) => {
   try {
     const request = await VerificationRequest.findOne({ user: req.user._id })
@@ -185,7 +171,6 @@ router.get('/verification-request/status', protect, async (req, res) => {
   }
 });
 
-// Check verification eligibility
 router.get('/verification-request/eligibility', protect, async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate('projects');

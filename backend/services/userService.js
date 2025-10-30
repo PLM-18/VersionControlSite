@@ -6,17 +6,14 @@ class UserService {
   async createUser(userData) {
     const { username, email, password, firstName, lastName } = userData;
 
-    // Check if user exists
     const userExists = await User.findOne({ $or: [{ email }, { username }] });
     if (userExists) {
       throw new Error('User already exists with this email or username');
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create user
     const user = await User.create({
       username,
       email,
@@ -67,7 +64,6 @@ class UserService {
   }
 
   async sendFriendRequest(fromUserId, toUserId) {
-    // Check if users exist
     const [fromUser, toUser] = await Promise.all([
       User.findById(fromUserId),
       User.findById(toUserId)
@@ -77,12 +73,10 @@ class UserService {
       throw new Error('User not found');
     }
 
-    // Check if already friends
     if (fromUser.friends.includes(toUserId)) {
       throw new Error('Already friends with this user');
     }
 
-    // Check if request already exists
     const existingRequest = toUser.friendRequests.find(
       req => req.from.toString() === fromUserId.toString() && req.status === 'pending'
     );
@@ -91,7 +85,6 @@ class UserService {
       throw new Error('Friend request already sent');
     }
 
-    // Add friend request
     toUser.friendRequests.push({
       from: fromUserId,
       status: 'pending'
@@ -104,7 +97,6 @@ class UserService {
 
     await Promise.all([toUser.save(), fromUser.save()]);
 
-    // Create notification
     await Notification.create({
       recipient: toUserId,
       sender: fromUserId,
@@ -138,10 +130,8 @@ class UserService {
       throw new Error('Requester not found');
     }
 
-    // Update request status
     request.status = 'accepted';
 
-    // Update sent request status
     const sentRequest = fromUser.sentFriendRequests.find(
       req => req.to.toString() === userId.toString() && req.status === 'pending'
     );
@@ -149,13 +139,11 @@ class UserService {
       sentRequest.status = 'accepted';
     }
 
-    // Add to friends list
     user.friends.push(request.from);
     fromUser.friends.push(userId);
 
     await Promise.all([user.save(), fromUser.save()]);
 
-    // Create notification
     await Notification.create({
       recipient: request.from,
       sender: userId,
@@ -211,7 +199,6 @@ class UserService {
       throw new Error('User not found');
     }
 
-    // Remove from friends list
     user.friends = user.friends.filter(id => id.toString() !== friendId.toString());
     friend.friends = friend.friends.filter(id => id.toString() !== userId.toString());
 

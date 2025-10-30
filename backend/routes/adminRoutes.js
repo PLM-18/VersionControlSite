@@ -14,9 +14,7 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-// ==================== ACTIVITY MANAGEMENT ====================
 
-// Get all activities with pagination
 router.get('/activities', protect, admin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -45,7 +43,6 @@ router.get('/activities', protect, admin, async (req, res) => {
   }
 });
 
-// Update activity
 router.put('/activities/:id', protect, admin, async (req, res) => {
   try {
     const activity = await Activity.findById(req.params.id);
@@ -69,7 +66,6 @@ router.put('/activities/:id', protect, admin, async (req, res) => {
   }
 });
 
-// Delete activity
 router.delete('/activities/:id', protect, admin, async (req, res) => {
   try {
     const activity = await Activity.findById(req.params.id);
@@ -87,9 +83,7 @@ router.delete('/activities/:id', protect, admin, async (req, res) => {
   }
 });
 
-// ==================== PROJECT MANAGEMENT ====================
 
-// Get all projects with pagination
 router.get('/projects', protect, admin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -117,7 +111,6 @@ router.get('/projects', protect, admin, async (req, res) => {
   }
 });
 
-// Update any project
 router.put('/projects/:id', protect, admin, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
@@ -147,7 +140,6 @@ router.put('/projects/:id', protect, admin, async (req, res) => {
   }
 });
 
-// Delete any project and its associated files
 router.delete('/projects/:id', protect, admin, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
@@ -156,7 +148,6 @@ router.delete('/projects/:id', protect, admin, async (req, res) => {
       return res.status(404).json({ message: 'Project not found' });
     }
 
-    // Delete project image if exists
     if (project.projectImage) {
       const imagePath = path.join(__dirname, '..', project.projectImage);
       try {
@@ -166,7 +157,6 @@ router.delete('/projects/:id', protect, admin, async (req, res) => {
       }
     }
 
-    // Delete all uploaded files
     for (const file of project.files) {
       if (file.path) {
         const filePath = path.join(__dirname, '..', file.path);
@@ -178,13 +168,11 @@ router.delete('/projects/:id', protect, admin, async (req, res) => {
       }
     }
 
-    // Remove project from users' project arrays
     await User.updateMany(
       { projects: project._id },
       { $pull: { projects: project._id } }
     );
 
-    // Delete associated activities
     await Activity.deleteMany({ project: project._id });
 
     await project.deleteOne();
@@ -196,9 +184,7 @@ router.delete('/projects/:id', protect, admin, async (req, res) => {
   }
 });
 
-// ==================== USER MANAGEMENT ====================
 
-// Get all users with pagination
 router.get('/users', protect, admin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -226,7 +212,6 @@ router.get('/users', protect, admin, async (req, res) => {
   }
 });
 
-// Update any user
 router.put('/users/:id', protect, admin, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -261,7 +246,6 @@ router.put('/users/:id', protect, admin, async (req, res) => {
   }
 });
 
-// Delete any user and associated data
 router.delete('/users/:id', protect, admin, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -270,12 +254,10 @@ router.delete('/users/:id', protect, admin, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Prevent deleting yourself
     if (user._id.toString() === req.user._id.toString()) {
       return res.status(400).json({ message: 'You cannot delete your own account' });
     }
 
-    // Delete user's profile image if exists
     if (user.profileImage) {
       const imagePath = path.join(__dirname, '..', user.profileImage);
       try {
@@ -285,10 +267,8 @@ router.delete('/users/:id', protect, admin, async (req, res) => {
       }
     }
 
-    // Delete all projects owned by user
     const userProjects = await Project.find({ owner: user._id });
     for (const project of userProjects) {
-      // Delete project files
       if (project.projectImage) {
         const imagePath = path.join(__dirname, '..', project.projectImage);
         try {
@@ -312,16 +292,13 @@ router.delete('/users/:id', protect, admin, async (req, res) => {
 
     await Project.deleteMany({ owner: user._id });
 
-    // Delete activities
     await Activity.deleteMany({ user: user._id });
 
-    // Remove user from friends lists
     await User.updateMany(
       { friends: user._id },
       { $pull: { friends: user._id } }
     );
 
-    // Delete verification requests
     await VerificationRequest.deleteOne({ user: user._id });
 
     await user.deleteOne();
@@ -333,9 +310,7 @@ router.delete('/users/:id', protect, admin, async (req, res) => {
   }
 });
 
-// ==================== PROJECT TYPE MANAGEMENT ====================
 
-// Get all project types
 router.get('/project-types', protect, admin, async (req, res) => {
   try {
     const projectTypes = await ProjectType.find()
@@ -349,7 +324,6 @@ router.get('/project-types', protect, admin, async (req, res) => {
   }
 });
 
-// Create new project type
 router.post('/project-types', protect, admin, async (req, res) => {
   try {
     const { name, description, icon, color } = req.body;
@@ -381,7 +355,6 @@ router.post('/project-types', protect, admin, async (req, res) => {
   }
 });
 
-// Update project type
 router.put('/project-types/:id', protect, admin, async (req, res) => {
   try {
     const projectType = await ProjectType.findById(req.params.id);
@@ -407,7 +380,6 @@ router.put('/project-types/:id', protect, admin, async (req, res) => {
   }
 });
 
-// Delete project type
 router.delete('/project-types/:id', protect, admin, async (req, res) => {
   try {
     const projectType = await ProjectType.findById(req.params.id);
@@ -425,9 +397,7 @@ router.delete('/project-types/:id', protect, admin, async (req, res) => {
   }
 });
 
-// ==================== VERIFICATION REQUEST MANAGEMENT ====================
 
-// Get all verification requests
 router.get('/verification-requests', protect, admin, async (req, res) => {
   try {
     const status = req.query.status || 'pending';
@@ -450,7 +420,6 @@ router.get('/verification-requests', protect, admin, async (req, res) => {
   }
 });
 
-// Approve verification request
 router.post('/verification-requests/:id/approve', protect, admin, async (req, res) => {
   try {
     const verificationRequest = await VerificationRequest.findById(req.params.id)
@@ -472,7 +441,6 @@ router.post('/verification-requests/:id/approve', protect, admin, async (req, re
     verificationRequest.reviewedAt = Date.now();
     await verificationRequest.save();
 
-    // Update user
     const user = await User.findById(verificationRequest.user._id);
     user.isVerified = true;
     user.verificationRequestStatus = 'approved';
@@ -489,7 +457,6 @@ router.post('/verification-requests/:id/approve', protect, admin, async (req, re
   }
 });
 
-// Reject verification request
 router.post('/verification-requests/:id/reject', protect, admin, async (req, res) => {
   try {
     const verificationRequest = await VerificationRequest.findById(req.params.id)
@@ -511,7 +478,6 @@ router.post('/verification-requests/:id/reject', protect, admin, async (req, res
     verificationRequest.reviewedAt = Date.now();
     await verificationRequest.save();
 
-    // Update user
     const user = await User.findById(verificationRequest.user._id);
     user.verificationRequestStatus = 'rejected';
     await user.save();

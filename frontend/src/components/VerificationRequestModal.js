@@ -143,7 +143,6 @@ const VerificationRequestModal = ({ onClose, onSuccess }) => {
     );
   }
 
-  // Show eligibility requirements
   const requirements = eligibility?.requirements;
   const canRequest = eligibility?.eligible;
 

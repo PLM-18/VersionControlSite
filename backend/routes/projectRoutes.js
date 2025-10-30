@@ -27,13 +27,11 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-// Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadsDir);
@@ -59,14 +57,12 @@ const upload = multer({
   }
 });
 
-// Public routes
 router.get('/', getAllProjects);
 router.get('/search', searchProjects);
 router.get('/user/:userId', getUserProjects);
 router.get('/:id', getProjectById);
 router.get('/:id/checkins', getProjectCheckins);
 
-// Protected routes
 router.post('/', protect, upload.fields([
   { name: 'projectImage', maxCount: 1 },
   { name: 'files', maxCount: 10 }
@@ -74,21 +70,16 @@ router.post('/', protect, upload.fields([
 router.put('/:id', protect, upload.single('projectImage'), updateProject);
 router.delete('/:id', protect, deleteProject);
 
-// Checkout/Checkin routes
 router.post('/:id/checkout', protect, checkoutProject);
 router.post('/:id/checkin', protect, upload.array('files', 10), checkinProject);
 
-// Member routes
 router.post('/:id/members', protect, addProjectMember);
 router.delete('/:id/members/:memberId', protect, removeProjectMember);
 
-// Ownership transfer route
 router.post('/:id/transfer-ownership', protect, transferOwnership);
 
-// File routes
 router.delete('/:id/files/:fileId', protect, deleteFile);
 
-// Discussion routes (nested under project)
 router.get('/:projectId/discussions', getDiscussions);
 
 export default router;

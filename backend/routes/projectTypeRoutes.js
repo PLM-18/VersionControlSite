@@ -4,7 +4,6 @@ import ProjectType from '../models/ProjectType.js';
 
 const router = express.Router();
 
-// Get all active project types (public)
 router.get('/', protect, async (req, res) => {
   try {
     const projectTypes = await ProjectType.find({ isActive: true })

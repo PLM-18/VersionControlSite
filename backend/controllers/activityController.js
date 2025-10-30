@@ -1,8 +1,5 @@
 import activityService from '../services/activityService.js';
 
-// @desc    Get global activity feed
-// @route   GET /api/activity/global
-// @access  Public
 export const getGlobalActivity = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 50;
@@ -13,9 +10,6 @@ export const getGlobalActivity = async (req, res) => {
   }
 };
 
-// @desc    Get local activity feed (user and friends)
-// @route   GET /api/activity/local
-// @access  Private
 export const getLocalActivity = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 50;
@@ -26,9 +20,6 @@ export const getLocalActivity = async (req, res) => {
   }
 };
 
-// @desc    Get user activity
-// @route   GET /api/activity/user/:userId
-// @access  Public
 export const getUserActivity = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 50;
@@ -39,9 +30,6 @@ export const getUserActivity = async (req, res) => {
   }
 };
 
-// @desc    Search activity
-// @route   GET /api/activity/search
-// @access  Public
 export const searchActivity = async (req, res) => {
   try {
     const { q } = req.query;

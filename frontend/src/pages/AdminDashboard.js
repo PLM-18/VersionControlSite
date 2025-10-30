@@ -12,7 +12,6 @@ const AdminDashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('projects');
 
-  // Redirect if not admin
   if (!user?.isAdmin) {
     return <Navigate to="/home" />;
   }

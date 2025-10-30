@@ -22,10 +22,8 @@ import {
   X,
   Edit,
   Trash2,
-  Settings,
   MessageSquare,
   Send,
-  ThumbsUp,
   CheckCircle,
   Pin,
   UserCog
