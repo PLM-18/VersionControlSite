@@ -89,9 +89,26 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Project'
   }],
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
   isVerified: {
     type: Boolean,
     default: false
+  },
+  verificationRequestStatus: {
+    type: String,
+    enum: ['none', 'pending', 'approved', 'rejected'],
+    default: 'none'
+  },
+  verificationRequestedAt: {
+    type: Date,
+    default: null
+  },
+  verifiedAt: {
+    type: Date,
+    default: null
   },
   lastActive: {
     type: Date,

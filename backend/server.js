@@ -9,6 +9,8 @@ import userRoutes from './routes/userRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import activityRoutes from './routes/activityRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+import projectTypeRoutes from './routes/projectTypeRoutes.js';
 
 dotenv.config();
 
@@ -30,6 +32,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/activity', activityRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/project-types', projectTypeRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });

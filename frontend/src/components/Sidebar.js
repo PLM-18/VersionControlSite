@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
-import { Home, User, FolderOpen, Bell, LogOut } from 'lucide-react';
+import { Home, User, FolderOpen, Bell, LogOut, Shield } from 'lucide-react';
+import VerifiedBadge from './VerifiedBadge.js';
 
 const Sidebar = ({ currentPage }) => {
   const navigate = useNavigate();
@@ -18,6 +19,16 @@ const Sidebar = ({ currentPage }) => {
     { icon: FolderOpen, label: 'Projects', path: '/projects', id: 'projects'},
     { icon: Bell, label: 'Notifications', path: '/notifications', id: 'notifications' },
   ];
+
+  // Add admin item if user is admin
+  if (user?.isAdmin) {
+    menuItems.push({
+      icon: Shield,
+      label: 'Admin',
+      path: '/admin',
+      id: 'admin'
+    });
+  }
 
   const isActive = (path) => {
     if (currentPage) {
@@ -70,9 +81,12 @@ const Sidebar = ({ currentPage }) => {
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">
-              {user?.firstName} {user?.lastName}
-            </p>
+            <div className="flex items-center space-x-1">
+              <p className="text-sm font-medium text-white truncate">
+                {user?.firstName} {user?.lastName}
+              </p>
+              {user?.isVerified && <VerifiedBadge size={14} />}
+            </div>
             <p className="text-xs text-gray-400 truncate">@{user?.username}</p>
           </div>
           <button

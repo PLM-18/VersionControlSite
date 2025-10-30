@@ -37,6 +37,8 @@ export const loginUser = async (req, res) => {
       firstName: user.firstName,
       lastName: user.lastName,
       profileImage: user.profileImage,
+      isAdmin: user.isAdmin,
+      isVerified: user.isVerified,
       token: generateToken(user._id),
     });
   } catch (error) {
@@ -64,6 +66,10 @@ export const getUserProfile = async (req, res) => {
       skills: user.skills,
       friends: user.friends,
       projects: user.projects,
+      isAdmin: user.isAdmin,
+      isVerified: user.isVerified,
+      verificationRequestStatus: user.verificationRequestStatus,
+      createdAt: user.createdAt,
     });
   } catch (error) {
     res.status(404).json({ message: error.message });
