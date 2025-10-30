@@ -236,3 +236,20 @@ export const deleteFile = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+// @desc    Transfer project ownership
+// @route   POST /api/projects/:id/transfer-ownership
+// @access  Private
+export const transferOwnership = async (req, res) => {
+  try {
+    const { newOwnerId } = req.body;
+    const project = await projectService.transferOwnership(
+      req.params.id,
+      req.user._id,
+      newOwnerId
+    );
+    res.json(project);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};

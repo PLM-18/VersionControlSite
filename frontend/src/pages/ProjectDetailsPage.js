@@ -27,7 +27,8 @@ import {
   Send,
   ThumbsUp,
   CheckCircle,
-  Pin
+  Pin,
+  UserCog
 } from 'lucide-react';
 import { projectAPI, discussionAPI } from '../services/api.js';
 
@@ -50,6 +51,8 @@ const ProjectDetailPage = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null);
   const [showCreateDiscussion, setShowCreateDiscussion] = useState(false);
+  const [showTransferOwnership, setShowTransferOwnership] = useState(false);
+  const [selectedNewOwner, setSelectedNewOwner] = useState('');
   const [checkinData, setCheckinData] = useState({
     message: '',
     changesDescription: '',
@@ -299,6 +302,31 @@ const ProjectDetailPage = () => {
     });
   };
 
+  const handleTransferOwnership = async () => {
+    if (!selectedNewOwner) {
+      toast.error('Please select a new owner');
+      return;
+    }
+
+    setConfirmAction({
+      title: 'Transfer Ownership',
+      message: 'Are you sure you want to transfer ownership of this project? You will become a regular member.',
+      confirmText: 'Transfer',
+      confirmColor: 'yellow',
+      onConfirm: async () => {
+        try {
+          await projectAPI.transferOwnership(id, selectedNewOwner);
+          await fetchProjectDetails();
+          setShowTransferOwnership(false);
+          setSelectedNewOwner('');
+          toast.success('Ownership transferred successfully!');
+        } catch (err) {
+          toast.error(err.message || 'Failed to transfer ownership');
+        }
+      }
+    });
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -494,13 +522,23 @@ const ProjectDetailPage = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold">Project Members</h2>
                   {isOwner && (
-                    <button
-                      onClick={() => setShowAddMemberModal(true)}
-                      className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-                    >
-                      <UserPlus size={18} />
-                      <span>Add Member</span>
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => setShowAddMemberModal(true)}
+                        className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                      >
+                        <UserPlus size={18} />
+                        <span>Add Member</span>
+                      </button>
+                      <button
+                        onClick={() => setShowTransferOwnership(true)}
+                        className="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                        title="Transfer Ownership"
+                      >
+                        <UserCog size={18} />
+                        <span>Transfer Ownership</span>
+                      </button>
+                    </div>
                   )}
                 </div>
                 <div className="space-y-3">
@@ -964,6 +1002,58 @@ const ProjectDetailPage = () => {
           }}
           onUpdate={handleFileUpdate}
         />
+      )}
+
+      {showTransferOwnership && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-6">Transfer Ownership</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Select New Owner *</label>
+                <select
+                  value={selectedNewOwner}
+                  onChange={(e) => setSelectedNewOwner(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none"
+                >
+                  <option value="">Choose a member...</option>
+                  {project.members
+                    ?.filter(member => member.role !== 'owner')
+                    .map((member) => (
+                      <option key={member.user._id} value={member.user._id}>
+                        {member.user.username} ({member.role})
+                      </option>
+                    ))}
+                </select>
+              </div>
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+                <p className="text-yellow-400 text-sm">
+                  <strong>Warning:</strong> Transferring ownership will make you a regular member.
+                  Only the new owner will be able to manage project settings, delete the project, or transfer ownership again.
+                </p>
+              </div>
+              <div className="flex space-x-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowTransferOwnership(false);
+                    setSelectedNewOwner('');
+                  }}
+                  className="flex-1 px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleTransferOwnership}
+                  disabled={!selectedNewOwner}
+                  className="flex-1 px-6 py-3 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg transition-colors"
+                >
+                  Transfer Ownership
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {confirmAction && (

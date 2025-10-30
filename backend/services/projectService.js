@@ -330,6 +330,57 @@ class ProjectService {
 
     return project;
   }
+
+  async transferOwnership(projectId, currentOwnerId, newOwnerId) {
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      throw new Error('Project not found');
+    }
+
+    // Check if user is current owner
+    if (project.owner.toString() !== currentOwnerId.toString()) {
+      throw new Error('Only the current owner can transfer ownership');
+    }
+
+    // Check if new owner is a member
+    const newOwnerMember = project.members.find(
+      member => member.user.toString() === newOwnerId.toString()
+    );
+
+    if (!newOwnerMember) {
+      throw new Error('New owner must be a member of the project');
+    }
+
+    // Update old owner to member role
+    const oldOwnerMember = project.members.find(
+      member => member.user.toString() === currentOwnerId.toString()
+    );
+    if (oldOwnerMember) {
+      oldOwnerMember.role = 'member';
+    }
+
+    // Update new owner role
+    newOwnerMember.role = 'owner';
+
+    // Transfer ownership
+    project.owner = newOwnerId;
+    project.lastActivity = new Date();
+
+    await project.save();
+
+    // Notify the new owner
+    const currentOwner = await User.findById(currentOwnerId);
+    await Notification.create({
+      recipient: newOwnerId,
+      sender: currentOwnerId,
+      type: 'ownership_transfer',
+      message: `${currentOwner.username} transferred ownership of ${project.title} to you`,
+      relatedProject: projectId
+    });
+
+    return project;
+  }
 }
 
 export default new ProjectService();

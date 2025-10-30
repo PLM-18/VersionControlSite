@@ -332,6 +332,16 @@ export const projectAPI = {
     if (!response.ok) throw new Error(data.message);
     return data;
   },
+
+  transferOwnership: async (projectId, newOwnerId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/projects/${projectId}/transfer-ownership`, {
+      method: 'POST',
+      body: JSON.stringify({ newOwnerId }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    return data;
+  },
 };
 
 export const activityAPI = {

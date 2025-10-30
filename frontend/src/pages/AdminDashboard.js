@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext.js';
 import { Navigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar.js';
-import { Shield, Users, FolderOpen, Activity, CheckCircle, Tag } from 'lucide-react';
+import { Shield, Users, FolderOpen, Activity, CheckCircle } from 'lucide-react';
 import AdminProjects from '../components/admin/AdminProjects.js';
 import AdminUsers from '../components/admin/AdminUsers.js';
 import AdminActivities from '../components/admin/AdminActivities.js';
 import AdminVerifications from '../components/admin/AdminVerifications.js';
-import AdminProjectTypes from '../components/admin/AdminProjectTypes.js';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -23,7 +22,6 @@ const AdminDashboard = () => {
     { id: 'users', label: 'Users', icon: Users },
     { id: 'activities', label: 'Activities', icon: Activity },
     { id: 'verifications', label: 'Verifications', icon: CheckCircle },
-    { id: 'project-types', label: 'Project Types', icon: Tag },
   ];
 
   const renderContent = () => {
@@ -36,8 +34,6 @@ const AdminDashboard = () => {
         return <AdminActivities />;
       case 'verifications':
         return <AdminVerifications />;
-      case 'project-types':
-        return <AdminProjectTypes />;
       default:
         return <AdminProjects />;
     }

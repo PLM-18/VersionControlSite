@@ -12,7 +12,8 @@ import {
   getProjectCheckins,
   searchProjects,
   getUserProjects,
-  deleteFile
+  deleteFile,
+  transferOwnership
 } from '../controllers/projectController.js';
 import { getDiscussions } from '../controllers/discussionController.js';
 import { protect } from '../middleware/auth.js';
@@ -80,6 +81,9 @@ router.post('/:id/checkin', protect, upload.array('files', 10), checkinProject);
 // Member routes
 router.post('/:id/members', protect, addProjectMember);
 router.delete('/:id/members/:memberId', protect, removeProjectMember);
+
+// Ownership transfer route
+router.post('/:id/transfer-ownership', protect, transferOwnership);
 
 // File routes
 router.delete('/:id/files/:fileId', protect, deleteFile);
