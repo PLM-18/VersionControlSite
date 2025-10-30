@@ -64,11 +64,6 @@ docker run --name u23629810 -p 5000:5000 u23629810
 
 ## Deliverable 2
 
-### MongoDB Connection String
-The application uses MongoDB for data persistence. The connection string should be provided in the `.env` file or as an environment variable.
-
-For testing, a default connection to `mongodb://localhost:27017/syncsphere` is used if no `MONGO_URI` is provided.
-
 ### API Endpoints
 
 #### Authentication
@@ -112,3 +107,5 @@ For testing, a default connection to `mongodb://localhost:27017/syncsphere` is u
 - `PUT /api/notifications/:id/read` - Mark as read (protected)
 - `PUT /api/notifications/read-all` - Mark all as read (protected)
 - `DELETE /api/notifications/:id` - Delete notification (protected)
+
+> Note: New endpoints could have been added to the finished product
